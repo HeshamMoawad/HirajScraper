@@ -1,27 +1,30 @@
+
+
+
 class Styles():
+    PALET = """
+    color:white;
+    background-color: #0E86D4;
+    """
+    PALET2 = """
+    color:black;
+    background-color:#68BBE3 ;
+    """
     BUTTON = """
     QPushButton{
         color:white;
-        background-color: #0000A9;
-        border:2px solid gray;
-        border-radius:12px;
-        font: 12pt  MV Boli;
+        background-color: transparent;
+        border:none;
+        border-radius:3px;
     }
     QPushButton:hover{
         color:black;
         background-color:white;
         
     }
-    QPushButton:disabled{
-        background-color:#d0d0d0;
-        color:black; 
-        opacity: 0.6;
-    }
     QPushButton:pressed{
-        color:white;
-        background-color: black;
-        
-        
+        color:black;
+        background-color: white;
     }
      """
 
@@ -42,7 +45,6 @@ class Styles():
 {
 	background-color: #c2c7d5;
 	color: #000;
-	font-weight: bold;
 	border: none;
 	border-radius: 2px;
 }
