@@ -524,21 +524,24 @@ class Thread(QThread):
             keyword , limit , commentscrape , hidebrowser = ui.lineEdit.text() , ui.spinBox.value() , ui.togglecomnt.isChecked() , ui.togglehide.isChecked()
             self.hiraj = Hiraj()
             self.hiraj.start_browser(hidebrowser=hidebrowser)
+            print(keyword , limit , commentscrape , hidebrowser )
             self.ai_search(keyword)
             self.statues.emit("Scrape Links ...")
             links = self.hiraj.scrape_links(limit=limit)
             self.statues.emit("Scrape Info ...")
             for link in links:
+                print(f'{len(ui.LeadsInThread) == limit-1}-------------\n')
                 if len(ui.LeadsInThread) == limit-1 :
                     break
                 self.hiraj.driver.get(link)
                 self.statues.emit("Scrape Ad Info ...")
                 infoauthor = self.hiraj.scrape_info()
+                print(infoauthor)
                 comntusersdata = []
                 if commentscrape:
                     self.statues.emit("Scrape Comments ...")
                     comment_users = self.hiraj.scrape_comments_users()
-                    # print(comment_users)
+                    print(comment_users)
                     if comment_users != None :
                         for user in comment_users:
                             self.statues.emit(f"Scrape {user} info ...")
