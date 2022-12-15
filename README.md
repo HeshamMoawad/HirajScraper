@@ -2,14 +2,14 @@
 Simple App to collect some data from "حراج" website that Collect Phone numbers and Ad Location and Ad Article 
 
 # Features
-1 - New Scrape Algorithm 
-2 - Fast Scrape
-3 - More Performance
-4 - Add New Style for Side Menu
+* 1 - New Scrape Algorithm 
+* 2 - Fast Scrape
+* 3 - More Performance
+* 4 - Add New Style for Side Menu
 
 # Fixed 
-1 - Fix HideBrowser Issue
-2 - Fix Phone Number Not Found
+* 1 - Fix HideBrowser Issue
+* 2 - Fix Phone Number Not Found
 
 # Project Photos
 
@@ -33,5 +33,5 @@ Simple App to collect some data from "حراج" website that Collect Phone numbe
 * [PyQt5](https://doc.qt.io/qtforpython/)   For Build GUI 
 * [Selenium](https://www.selenium.dev/)     For WebAutomation
 
-# v2.1 Update 
+#### v2.1 Update 
 ## Made By K7_Team Hesham
