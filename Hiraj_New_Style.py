@@ -1,5 +1,5 @@
 from datetime import datetime
-import sys
+import sys,typing
 from PyQt5.QtCore import QRect , Qt
 from PyQt5.QtWidgets import ( QCheckBox, QComboBox, 
 QGroupBox,  QLabel, QVBoxLayout,QPushButton,QAbstractItemView, QGridLayout ,
@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QMessageBox,QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QThread,pyqtSignal
 from mainclass import Hiraj
-from MyPyQt5 import MyQTreeWidget , QSideMenuNewStyle , AnimatedToggle
+from MyPyQt5 import MyQTreeWidget ,MyMessageBox, MyThread,AnimatedToggle ,QSideMenuEnteredLeaved ,MyCustomContextMenu
 import pyperclip
 from styles import Styles
 import sqlite3
@@ -18,6 +18,8 @@ from sqlite3 import IntegrityError, OperationalError
 
 
 class Ui_MainWindow(object):
+    Name = ""
+    msg = MyMessageBox()
     CATEGORIES = ['حراج السيارات', 'حراج العقار', 'حراج الأجهزة', 'مواشي وحيوانات وطيور', 'اثاث', 'مستلزمات شخصية', 'خدمات', 'وظائف', 'اطعمة ومشروبات', 'برمجة وتصاميم', 'مكتبة وفنون', 'صيد ورحلات']
     SUBCATEGORY = [['', 'هونشي', 'زوتي', 'ماهيندرا', 'ساوايست', 'تسلا', 'بايك', 'جاك JAC', 'ماكلارين', 'ماكسيس', 'ليفان', 'فيكتوري اوتو', 'فوتون', 'سي ام سي', 'جيتور', 'جى ام سي JMC', 'تاتا', 'الفا روميو', 'BYD', 'فاو FAW', 'جريت وول Great Wall', 'جي ايه سي GAC', 'هافال', 'بروتون', 'استون مارتن', 'سانج يونج', 'فيات', 'ساب', 'دايو', 'سيات', 'تشيري', 'سيتروين', 'فيراري', 'سكودا', 'اوبل', 'لامبورجيني', 'رولز رويس', 'مازيراتي', 'بيوك', ' رينو', 'شانجان', 'ZXAUTO', 'MG', 'سوبارو', 'جاكوار', 'بنتلي', 'بيجو', 'فولفو', 'ميركوري', 'جيلي', 'ديهاتسو', 'فولكس واجن', 'لنكولن', 'همر', 'انفنيتي', 'سوزوكي', 'اودي', 'بورش', 'كاديلاك', 'ايسوزو', 'لاند روفر', 'مازدا', 'ميتسوبيشي', 'جيب','كرايزلر', 'دودج', 'كيا', 'دبابات', 'بي ام دبليو', 'هوندا', 'مرسيدس', 'شاحنات ومعدات ثقيلة', 'جي ام سي', 'لكزس', 'جنسس', 'هونداي', 'نيسان', 'قطع غيار وملحقات', 'شيفروليه', 'فورد', 'تويوتا'], ['', 'بيوت للايجار', 'ادوار للايجار', 'مزارع للبيع', 'فلل للايجار', 'استراحات للبيع', 'عماره للايجار', 'محلات للايجار', 'محلات للتقبيل', 'استراحات للايجار', 'عمارة للبيع', 'اراضي تجارية للبيع', 'بيوت للبيع', 'شقق للبيع', 'فلل للبيع', 'شقق للايجار', 'اراضي للبيع'], ['', 'غسالة سامسونج', 'ثلاجة سامسونج', 'اجهزة غير مصنفة', 'هيتاشي Hitachi', 'باناسونيك Panasonic', 'مايكروسوفت Microsoft', 'ال جي LG', 'أرقام مميزة', 'حسابات واشتراكات', 'كاميرات تصوير', 'تلفزيونات وصوتيات', 'ألعاب إلكترونية', 'أجهزة كمبيوتر', 'أجهزة تابلت', 'جوالات'], ['', 'وبر', 'هامستر', 'سناجب', 'بط', 'ارانب', 'أسماك وسلاحف', 'بقر', 'كلاب', 'خيل', 'أبل', 'دجاج', 'قطط', 'حمام', 'ببغاء', 'ماعز', 'غنم'], ['', 'مجالس ومفروشات', 'طاولات وكراسي', 'خزائن ودواليب', 'تحف وديكور', 'أسرة ومراتب', 'أدوات منزلية', 'أثاث مكتبي', 'أثاث خارجي'], ['', 'ملابس أطفال', 'ملابس نسائية', 'ملابس رجالية', 'نظارات', 'مستلزمات رياضية', 'عطورات', 'ساعات'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات','زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفروسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['']]
     AREAS = ["كل المناطق","الرياض","الشرقيه","جده","مكه","ينبع","حفر الباطن","المدينة","الطايف","تبوك","القصيم","حائل","أبها","عسير","الباحة","جيزان","نجران","الجوف","عرعر","الكويت","الإمارات","البحرين"]
@@ -36,7 +38,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
 
-        self.Menu = QSideMenuNewStyle(
+        self.Menu = QSideMenuEnteredLeaved(
             self.centralwidget,
             ButtonsCount=2,
             ExitButtonIconPath="Data/Icons/reject.png" ,
@@ -45,50 +47,37 @@ class Ui_MainWindow(object):
             MaxButtonIconPath="Data\Icons\maximize.png",
             Mini_MaxButtonIconPath="Data\Icons\minimize.png",
             MiniButtonIconPath="Data\Icons\delete.png",
-
+            ButtonsFixedHight=40 ,
+            ButtonsFrameFixedwidthMini= 40 ,
         )   
         # Stytles -----------
         self.Menu.TopFrame.setStyleSheet(Styles.PALET)
         self.Menu.ButtonsFrame.setStyleSheet(Styles.PALET)
-
-
         MainWindow.setFont(self.font)
         self.page1 = self.Menu.GetPage(0)
-        # self.page1.setStyleSheet(Styles.PALET2)
         self.Menu.setCurrentPage(1)
         self.page2 = self.Menu.GetPage(1)
         self.ButtonDashBoard = self.Menu.GetButton(0)
         self.ButtonDashBoard.setText("DashBoard")
         self.Menu.setButtonIcon(0,"Data/Icons/dashboard.png")
-        # self.Menu.GetButton(0).setIconSize(QtCore.QSize(20,20))
-        # self.Menu.GetButton(1).setIconSize(QtCore.QSize(20,20))
         self.Menu.setButtonIcon(1,"Data/Icons/setting.png")
         self.ButtonSetting = self.Menu.GetButton(1)
         self.ButtonSetting.setText("Setting")
         self.gridLayout = QGridLayout(self.page2)
-        self.treewidget = MyQTreeWidget(self.page2)
-
+        self.treewidget = MyQTreeWidget(self.page2,counterLabel=None)
+        self.treewidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.treewidget.customContextMenuRequested.connect(self.menu)###
         self.framecounts = QtWidgets.QFrame(self.page2)
         self.Hframecount = QtWidgets.QHBoxLayout(self.framecounts)
-
-
         self.countlabel = QLabel(self.framecounts)
         self.countlabel.setText("Count : 0 ")
         self.Hframecount.addWidget(self.countlabel,1,QtCore.Qt.AlignmentFlag.AlignCenter)
-
         self.countchildlabel = QLabel(self.framecounts)
         self.countchildlabel.setText("Comment: 0 ")
         self.Hframecount.addWidget(self.countchildlabel,1,QtCore.Qt.AlignmentFlag.AlignCenter)
-
-
         self.countotalabel = QLabel(self.framecounts)
         self.countotalabel.setText("Total: 0 ")
         self.Hframecount.addWidget(self.countotalabel,1,QtCore.Qt.AlignmentFlag.AlignCenter)
-
-
-
-
-
         self.Menu.MainLabel.setText("Statues")
         self.frameButtons = QtWidgets.QFrame(self.page1)
         self.Hframe = QtWidgets.QHBoxLayout(self.frameButtons)
@@ -137,12 +126,9 @@ class Ui_MainWindow(object):
         self.label_6 = QtWidgets.QLabel(self.frame_2)
         self.label_6.setText("Category")
         self.horizontalLayout_3.addWidget(self.label_6)
-
         self.comboboxfont = QtGui.QFont()
         self.comboboxfont.setFamily("Arabic Typesetting")
-        # self.comboboxfont.setBold(True)
         self.comboboxfont.setPointSize(18)
-
         self.comboBox_4 = QtWidgets.QComboBox(self.frame_2)
         self.comboBox_4.setFont(self.comboboxfont)
         self.comboBox_4.addItems(["كل الاقسام"]+self.CATEGORIES)
@@ -155,7 +141,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.addWidget(self.label_9)
         self.comboBox_5 = QtWidgets.QComboBox(self.frame_3)
         self.comboBox_5.setFont(self.comboboxfont)
-
         self.horizontalLayout_4.addWidget(self.comboBox_5)
         self.verticalLayout.addWidget(self.frame_3)
         self.frame_4 = QtWidgets.QFrame(self.groupBox_2)
@@ -226,41 +211,79 @@ class Ui_MainWindow(object):
         self.verticalLayout_main.setStretch(2,3)
         self.verticalLayout_main.setSpacing(5)
         self.gridLayout.setContentsMargins(0,0,0,0)
-        self.treewidget.setColumns(["Username","Phone number","Location","Date","Time"])
+        self.treewidget.setColumns(["Username","Phone number","Location"])
         self.treewidget.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.treewidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ButtonStart.setDisabled(True)
-        self.treewidget.customContextMenuRequested.connect(self.menu)
         self.handles_list = []
         ## Connection 
         self.ButtonDashBoard.clicked.connect(lambda : self.Menu.setCurrentPage(1))
         self.ButtonSetting.clicked.connect(lambda : self.Menu.setCurrentPage(0))
         self.comboBox_4.currentIndexChanged.connect(self.setcombo)
-
         self.treewidget.onLengthChanged.connect(self.counter)
-        # self.treewidget.childChanged.connect(self.commentcount)
-        
         self.lineEdit_2.textChanged.connect(self.disabledlink)
-
         self.lineEdit.textChanged.connect(self.disabled)
         self.spinBox.valueChanged.connect(self.disabled)
         # KeyWord Thread
         self.thread = Thread()
         self.thread.statues.connect(self.Menu.MainLabel.setText)
-        self.thread.lead.connect(self.lead)
+        self.thread.lead.connect(self.treewidget.appendData)
         self.thread.message.connect(self.messagebox)
         self.ButtonStart.clicked.connect(self.start_thread)
         self.ButtonStop.clicked.connect(self.kill)
-
         # Sec Thread 
         self.thread_link = ThreadLink()
         self.thread_link.statues.connect(self.Menu.MainLabel.setText)
-        self.thread_link.lead.connect(self.lead)
+        self.thread_link.lead.connect(self.treewidget.appendData)
         self.thread_link.message.connect(self.messagebox)
-
         MainWindow.setCentralWidget(self.centralwidget)
         self.LeadsInThread = []
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def shadow(self):
+        shadow = QtWidgets.QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(20)
+        shadow.setOffset(-10,10)
+        shadow.setColor(QtGui.QColor("black"))
+        return shadow
+
+    def menu(self):
+        menu = MyCustomContextMenu([
+            "Copy User",
+            "Copy PhoneNumber" ,
+            "Copy PhoneNumber List" ,
+            "Export To Excel" ,
+            "Delete Row" ,
+            "Clear"
+        ])
+        menu.multiConnect([
+            lambda: self.copy(0) ,
+            lambda: self.copy(1) ,
+            lambda : pyperclip.copy(self.treewidget.extract_data_to_string(1)) if self.treewidget._ROW_INDEX != 0 else self.msg.showWarning(text="No Data In Column !") ,
+            lambda : self.export(self.Name) ,
+            lambda : self.delete() ,
+            lambda : self.treewidget.clear() ,
+        ])
+        menu.show()
+
+    def copy(self , index:int):
+        try :
+            pyperclip.copy(self.treewidget.currentItem().text(index))
+        except :
+            self.msg.showWarning(text="No Item Selected please Select one !")
+
+    def delete(self):
+        try:
+            self.treewidget.takeTopLevelItem(self.treewidget.indexOfTopLevelItem(self.treewidget.currentItem()))
+        except:
+            self.msg.showWarning(text="No Item Selected please Select one !")
+
+    def export(self,name:typing.Optional[str]):
+        if self.treewidget._ROW_INDEX > 0 :
+            self.treewidget.extract_data_to_DataFrame().to_excel(f"Data/Exports/{name}[{datetime.now().date()}].xlsx",index=False)
+            self.msg.showInfo(text=f"Exported Succecfully to 'Data/Exports/{name}[{datetime.now().date()}].xlsx'")
+        else :
+            self.msg.showWarning(text="No Data In App Please Try Again Later")
+
 
     def disabledlink(self):
         if "https://haraj.com.sa" in self.lineEdit_2.text():
@@ -313,46 +336,10 @@ class Ui_MainWindow(object):
         self.comboBox_5.addItems(self.SUBCATEGORY[index-1])
 
 
-    def lead(self,data:list):
-        try:
-            data = self.reshape_data(data)
-            con= True
-        except :
-            con = False
-            pass
-        if con:
-            if len(data[1]) > 0:
-                ui.treewidget.appendData(items=data[0],childs=data[1])
-                self.LeadsInThread.append([data])
-            elif len(data[1]) == 0 and len(data[0]) != 0 :
-                ui.treewidget.appendData(items=data[0])
-                self.LeadsInThread.append([data])
+        
 
 
 
-
-    def reshape_data(self,data):
-        data[1] = [datachild for datachild in data[1] if datachild[1] != None and self.searchDb(str(datachild[1])) == [] ]
-        for datachild in data[1]:
-            db_datachild = {"handle":datachild[0],"phone":datachild[1],"address":data[0][2],"timescrape":datachild[4],"comment":data[0][0]}
-            self.add_to_db(**db_datachild)
-            datachild[1] = f"+966{str(datachild[1])[1:]}" if len(datachild[1]) == 10 else  "+9665"+ datachild[1].split("05",1)[1:][0]
-            ##############
-            search = self.searchDb(str(data[0][1]))
-            if data[0][1] != None : 
-                data[0][1] = f"+966{str(data[0][1])[1:]}" if len(data[0][1]) == 10 else  "+9665"+ data[0][1].split("05",1)[1:][0]
-                if search == [] :
-                    db_data = {"handle":data[0][0],"phone":f"{data[0][1]}","address":data[0][2],"timeadded":data[0][3],"timescrape":data[0][4]}
-                    self.add_to_db(**db_data)
-        if len(data[1]) == 0 :
-            search = self.searchDb(str(data[0][1]))
-            if data[0][1] != None and search == [] :
-                db_data = {"handle":data[0][0],"phone":f"{data[0][1]}","address":data[0][2],"timeadded":data[0][3],"timescrape":data[0][4]}
-                self.add_to_db(**db_data)
-                data[0][1] = f"+966{str(data[0][1])[1:]}" if len(data[0][1]) == 10 else  "+9665"+ data[0][1].split("05",1)[1:][0]
-            else:
-                data[0].clear()
-        return data
 
 
     def add_to_db(self , **kwargs):
@@ -366,9 +353,6 @@ class Ui_MainWindow(object):
         except OperationalError:
             return False
 
-    def searchDb(self,val):
-        self.curser.execute(f"""SELECT * FROM maindata WHERE phone = '{val}'; """)
-        return self.curser.fetchall()
 
 
     def messagebox(self,text:str ,type=QMessageBox.Information)->None: # that mean this Function not working outside Class
@@ -377,82 +361,6 @@ class Ui_MainWindow(object):
         messagebox.setText(f"\t{text}\t")
         messagebox.setWindowTitle("Information")
         messagebox.exec_()
-
-    def menu(self):
-        def copylist(index):
-            pyperclip.copy(ui.treewidget.extract_data_to_string(index)) 
-            
-        def copy(index):
-            try:
-                item = ui.treewidget.currentItem().text(index)
-                pyperclip.copy(item)
-            except:
-                pass
-
-        def export(msg:bool=False , name:str=""):
-            dataframe = ui.treewidget.extract_data_to_DataFrame()
-            if dataframe.empty :
-                self.messagebox(" Empty Data Please add any thing")
-            else:
-                dataframe.to_excel(f"Data\Exports/Export[{name}-{datetime.now().date()}].xlsx",index=False)
-                if msg:
-                    self.messagebox(text=f" Saved Succecfuly In Data Folder as \n Exports\Export[{name}-{datetime.now().date()}].xlsx")
-
-        def delete_():
-            try:
-                index = ui.treewidget.indexOfTopLevelItem(ui.treewidget.currentItem())
-                ui.handles_list.remove([ui.treewidget.currentItem().text(0),ui.treewidget.currentItem().text(1)])
-                ui.treewidget.takeTopLevelItem(index)
-            except Exception as e:
-                print(e)
-                pass
-
-
-        def copycolumn():
-            users = ui.treewidget.extract_data_to_list(0)
-            handles= ui.treewidget.extract_data_to_list(1)
-            result = " UserName  :  Phones \n"
-            if len(users)== 0 or len(handles) == 0 :
-                self.messagebox(text=" Empty Data Please add any thing")
-            for row in range(ui.treewidget._ROW_INDEX):
-                result = result+ f"\t{users[row]}  :  {handles[row]} \t\n"
-            pyperclip.copy(result)
-
-
-        def clear():
-            ui.treewidget.clear()
-            ui.handles_list.clear()
-            
-
-        menu = QtWidgets.QMenu()
-
-        copyname = menu.addAction("Copy Name")
-        copyname.triggered.connect(lambda:copy(0))##########
-        
-        copyhandle = menu.addAction("Copy Phone")
-        copyhandle.triggered.connect(lambda:copy(1))##############
-
-        delete = menu.addAction("Delete Row")
-        delete.triggered.connect(delete_)###############
-
-        export_ = menu.addAction("Export All To Excel")
-        export_.triggered.connect(lambda : export(True , ui.thread.name))############
-
-        copynamelist = menu.addAction("Copy Names List")
-        copynamelist.triggered.connect(lambda:copylist(0))##########
-        
-        copyhandlelist = menu.addAction("Copy Phones List")
-        copyhandlelist.triggered.connect(lambda:copylist(1))##############
-
-
-        result = menu.addAction("Copy UserNames and Phones")
-        result.triggered.connect(copycolumn)#########
-
-        clear_ = menu.addAction("Clear Results")
-        clear_.triggered.connect(clear)#########
-
-        cursor = QtGui.QCursor()
-        menu.exec_(cursor.pos())
 
 
 ############################# ---------------------- Link Thread -------------------------
@@ -469,7 +377,6 @@ class ThreadLink(QThread):
         ui.LeadsInThread.clear()
         self.name = ""
         link = ui.lineEdit_2.text()
-        # ui.lineEdit_2.clear()
         self.statues.emit("Opening Browser")
         self.hiraj = Hiraj()
         self.hiraj.start_browser(ui.togglehide.isChecked())
@@ -522,10 +429,19 @@ class Thread(QThread):
         else:
             self.statues.emit("Opening Browser")
             keyword , limit , commentscrape , hidebrowser = ui.lineEdit.text() , ui.spinBox.value() , ui.togglecomnt.isChecked() , ui.togglehide.isChecked()
-            self.hiraj = Hiraj()
-            self.hiraj.start_browser(hidebrowser=hidebrowser)
             print(keyword , limit , commentscrape , hidebrowser )
-            self.ai_search(keyword)
+            self.hiraj = Hiraj(
+                url= "https://haraj.com.sa/",
+                DBconnect = "Data\DataBase.db",
+                darkMode = True , 
+                headless = hidebrowser ,
+            ) ##################
+            self.hiraj.LeadSignal.connect(self.lead.emit)
+            self.hiraj.Status.connect(self.statues.emit)
+            self.hiraj.search(
+                keyword = keyword ,
+                **self.ai_search(keyword)
+            )    
             self.statues.emit("Scrape Links ...")
             links = self.hiraj.scrape_links(limit=limit)
             self.statues.emit("Scrape Info ...")
@@ -533,21 +449,13 @@ class Thread(QThread):
                 print(f'{len(ui.LeadsInThread) == limit-1}-------------\n')
                 if len(ui.LeadsInThread) == limit-1 :
                     break
-                self.hiraj.driver.get(link)
                 self.statues.emit("Scrape Ad Info ...")
-                infoauthor = self.hiraj.scrape_info()
-                print(infoauthor)
-                comntusersdata = []
-                if commentscrape:
-                    self.statues.emit("Scrape Comments ...")
-                    comment_users = self.hiraj.scrape_comments_users()
-                    print(comment_users)
-                    if comment_users != None :
-                        for user in comment_users:
-                            self.statues.emit(f"Scrape {user} info ...")
-                            infocomntuser = self.hiraj.scrape_user_info(user)
-                            comntusersdata.append(infocomntuser)
-                self.lead.emit([infoauthor,comntusersdata])
+                ################
+                self.hiraj.get_Ad_Info (
+                    link= link ,
+                    scrapeComent= ui.togglecomnt.isChecked() ,
+                )
+
             self.hiraj.exit()
             self.message.emit(" Scrape Ending ^_^ ")
             self.statues.emit(" Scrape Ending ^_^ ")
@@ -568,16 +476,23 @@ class Thread(QThread):
         if ui.comboBox_6.currentIndex():
             result.update({"city":area}) 
         print(result)
-        self.hiraj.search(keyword=keyword,**result)
         self.name = f"{keyword}-{list(result.values())}".replace("]","").replace("[","")
+        ui.Name = self.name
+        return result
 
-    def kill(self):
-        if self.isRunning() :
-            self.hiraj.exit()
+    def kill(self,msg:bool= False):
+        """Method to kill Thread when it Running"""
+        if self.isRunning():
+            try:
+                self.hiraj.exit()
+            except :
+                pass
             self.terminate()
             self.wait()
-            self.statues.emit("Stopped")
-            self.message.emit(f" Stopped ")
+            if msg:
+                ui.msg.showInfo(text="سيبونا ناخد فرصتنا بقى")
+
+
 
 
 if __name__ == "__main__":

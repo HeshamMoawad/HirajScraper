@@ -513,37 +513,11 @@ class MyMessageBox(QMessageBox):
 
 ## --------------- New Class to Convert CustomContextMenu
 class MyCustomContextMenu(QObject):
-    Actions = []
-    Functions = []
-    @typing.overload
-    def __init__(self,Actions_arg:typing.List[str]) -> None: ...
-        # super().__init__()
-        # self.Menu = QMenu()
-        # self.Actions = self.convert(Actions_arg)
-    @typing.overload
-    def __init__(self,Actions_Func:typing.Dict[str,typing.Any],widget:typing.Optional[QWidget]) -> None: ...
-        
 
-    def __init__(
-        self,
-        widget:typing.Optional[QWidget] ,
-        Actions_arg:typing.Optional[typing.List[str]],
-        Actions_Func:typing.Optional[typing.Dict[str,typing.Any]] ,
-        ) -> None:
+    def __init__(self,Actions_arg:typing.List[str]) -> None:
         super().__init__()
         self.Menu = QMenu()
-        if Actions_arg != None:
-            self.Actions = self.convert(Actions_arg)
-        elif Actions_Func != None:
-            for key in Actions_Func.keys():
-                self.Actions.append(key)
-                self.Functions.append(Actions_Func[key])
-                self.Actions[self.Actions.index(key)].triggered.connect(Actions_Func[key])
-            if widget != None :
-                self.show()
-                widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-                widget.customContextMenuRequested.connect(self.Menu)
-
+        self.Actions = self.convert(Actions_arg)
 
 
     def convert(self,Actions_arg:typing.List[str])-> typing.List[QAction]:
@@ -568,6 +542,70 @@ class MyCustomContextMenu(QObject):
     def show(self):
         cur = QCursor()
         self.Menu.exec_(cur.pos())
+
+
+# class MyCustomContextMenu(QObject):
+#     __Actions = []
+#     __Functions = []
+
+#     @typing.overload
+#     def __init__(self,Actions_arg:typing.List[str]) -> None: 
+#         """Input Actions string only \nMust use multiConnect function after calling class and use show method """
+#         ...
+#     @typing.overload
+#     def __init__(self,Actions_Func:typing.Dict[str,typing.Any],widget:typing.Optional[QWidget]) -> None : 
+#         """ 1- Input Actions as Dict \n 2- Input Widget that will show in \nlike this :-\n
+
+#         MyCustomContextMenu({'copy': func}, widget)\n
+#         To Start Fast"""
+#         ...
+    
+#     def __init__(
+#         self,
+#         Actions_arg:typing.Optional[typing.List[str]] = None,
+#         Actions_Func:typing.Optional[typing.Dict[str,typing.Any]] = None,
+#         ) -> None:
+#         self.__Actions_arg = Actions_arg
+#         self.__Actions_Func = Actions_Func
+#         super().__init__()
+
+    
+#     def connect(self):
+#         self.Menu = QMenu()
+#         if self.__Actions_arg != None:
+#             self.__Actions = self.convert(self.__Actions_arg)
+#         elif self.__Actions_Func != None:
+#             for key in self.__Actions_Func.keys():
+#                 Action = self.Menu.addAction(key)
+#                 Action.triggered.connect(self.__Actions_Func[key])
+#                 self.__Actions.append(Action)
+#                 self.__Functions.append(self.__Actions_Func[key])
+#             self.show()
+
+#     def convert(self,Actions_arg:typing.List[str])-> typing.List[QAction]:
+#         """Adding Actions to contextmenu and returns it into List[QAction]"""
+#         result = []
+#         for action in Actions_arg:
+#             Action = self.Menu.addAction(action)
+#             result.append(Action)
+#         return result
+
+#     def connectShortcut(self ,index_of_Action:int,shortcut)-> None  :
+#         self.__Actions[index_of_Action].setShortcut(shortcut)
+        
+#     def multiConnect(self,functions:typing.List[typing.Callable] , range_of:typing.Optional[range]=None):
+#         for Action in (range(len(self.__Actions)) if range_of == None else range_of):
+#             self.__Actions[Action].triggered.connect(functions[Action])
+
+#     def getActions(self)->typing.List[str]:
+#         return self.__Actions
+
+#     def getFunctions(self)->typing.List:
+#         return self.__Functions
+
+#     def show(self):
+#         cur = QCursor()
+#         self.Menu.exec_(cur.pos())
 
 
 ## ------------- Custom Thread class
@@ -600,7 +638,6 @@ class MyQMainWindow(QMainWindow):
     Entered = pyqtSignal()
     ShowSignal = pyqtSignal()
     MessageBox = MyMessageBox()
-    
     
     def __init__(self) -> None:
         super().__init__()
@@ -639,9 +676,34 @@ class MyQMainWindow(QMainWindow):
     
 ## ---------------------- Validation some texts 
 class Validation(object):
+    class Numbers(object):
+        def __init__(self,phone:str) -> None:
+            self.__phone = phone
+        def __len__(self):
+            return len(self.__phone)
+        def setPhone(self,phone:str)-> None :
+            self.__phone = phone
+        @property 
+        def phone(self) -> str :
+            return self.__phone
+        @property
+        def length(self):
+            return len(self.__phone)
+        def saudiNumberCountryCode(self) -> str:
+            if self.length > 13 : # +9660557888738
+                return self.__phone[:4]+self.__phone[6:]
+            elif self.length > 12 and "+" in self.__phone: # +966557888738
+                return self.__phone
+            elif self.length > 12 and "+" not in self.__phone: # 9660557888738
+                return self.__phone
+            elif self.length > 11 and "+" not in self.__phone : # 966557888738
+                return "+" + self.__phone
+            elif self.length > 9 : # 0557888738
+                return "+966" + self.__phone[1:]
+            elif self.length > 8 : # 557888738
+                return "+966" + self.__phone
 
-    class TelegramValidation(object):
-
+    class Telegram(object):
         def channelNameOrLinkToHandle(self,text:str)->str:
             """This Method takes TelegramLink or TelegramHandle and Returns into Handle 
             examples :
@@ -655,13 +717,13 @@ class Validation(object):
 
 
 
+
 ## ---------------------- Used For some simple Batabase Actions 
 
 class DataBase():
     def __init__(self,relativepath:str = "Data\Database.db") -> None:
         self.con = sqlite3.connect(relativepath)
         self.cur = self.con.cursor()
-
 
     def exist(self,column,val):
         """
@@ -672,7 +734,6 @@ class DataBase():
         """
         self.cur.execute(f"""SELECT * FROM data WHERE {column} = '{val}'; """)
         return True if self.cur.fetchall() != [] else False
-    
     
     def add_to_db(self,table:str,**kwargs):
         """
@@ -761,29 +822,47 @@ class JavaScriptCodeHandler(object):
 class BaseScrapingClassQt5(QObject):
     LeadSignal = pyqtSignal(list)
     PersntageSignal = pyqtSignal(int)
+    Status = pyqtSignal(str)
+
+    @typing.overload
+    def __init__(self,url:str,headless:bool=False,darkMode:bool=False,DBconnect:str=None) -> None:
+        """For Normal Class and Not have login Page or you don't want to save browser data\n* DataBase Connection is Optional Param-> DBconnect"""
+        ...
+    @typing.overload
+    def __init__(self,url:str,headless:bool,darkMode:bool,loginElementXpath:str,userProfile:str="Guest",DBconnect:str=None) -> None:
+        """For Login Class and Saving Login and Browser data\n* DataBase Connection is Optional Param-> DBconnect"""
+        ...
+
     def __init__(
             self,
             url:str ,
-            loginElementXpath:str ,
+            loginElementXpath:str = None ,
             headless:bool = False ,
             darkMode:bool = False ,
-            # userProfile:str="Guest", 
+            userProfile:str= None ,
+            DBconnect:str = None ,
             ) -> None:
         
         option = Options()
-        option.headless = True if  headless == True else False
+        option.headless = True if  headless else  False
         option.add_experimental_option("excludeSwitches", ["enable-logging"])
         option.add_argument('--disable-logging')
-        option.add_argument('--force-dark-mode') if darkMode == True else None
-        # option.add_argument(f"user-data-dir={os.getcwd()}\\Profiles\\{userProfile}")
+        option.add_argument('--force-dark-mode') if darkMode else None
+        option.add_argument(f"user-data-dir={os.getcwd()}\\Profiles\\{userProfile}") if userProfile != None else None
         self.driver = Chrome(ChromeDriverManager().install(),options=option)
         self.js = JavaScriptCodeHandler(self.driver)
         self.driver.maximize_window()
         self.driver.get(url)
         self.leadCount = 0
-        self.js.WaitingElement(600,loginElementXpath)
+        if DBconnect != None :
+            self.con = sqlite3.connect(DBconnect)
+            self.cur = self.con.cursor()
+        self.js.WaitingElement(600,loginElementXpath) if loginElementXpath != None else None
         QThread.sleep(3)
         super().__init__()
+
+    def sleep(self,a:int):
+        QThread.sleep(a)
 
     def exit(self):
         """To exit webdriver"""
@@ -791,3 +870,213 @@ class BaseScrapingClassQt5(QObject):
             self.driver.quit()
         except Exception as e :
             print(e)
+
+
+class QSideMenuEnteredLeaved(QWidget):
+    def __init__(
+            self,
+            parent:QWidget,
+            ButtonsCount:int = 2,
+            PagesCount:int = 2 ,
+            ButtonsSpacing:int = 3 ,
+            Duration:int = 400 ,
+            DefultIconPath:str = None ,
+            ClickIconPath:str = None ,  
+            StretchMenuForStacked:tuple=(1,5) ,
+            StretchTopForBottomFrame:tuple = (1,6),
+            ButtonsFrameFixedwidth:int=None,
+            ButtonsFrameFixedwidthMini:int=30,
+            TopFrameFixedHight:int= 40,
+            ExitButtonIconPath:str=None ,
+            ButtonsFixedHight:int=None , 
+            MaxButtonIconPath:str = None ,
+            Mini_MaxButtonIconPath:str = None ,
+            MiniButtonIconPath:str = None,
+            **kwargs,
+
+        ) -> None:
+        super().__init__(parent)
+        self.ButtonsFrameFixedwidthMini = ButtonsFrameFixedwidthMini
+        self.DefultIconPath = DefultIconPath
+        self.ClickIconPath = ClickIconPath
+        self.verticalLayout = QVBoxLayout(parent)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setSpacing(0)
+        self.TopFrame = MyQFrame(parent,Draggable=True)
+        self.TopFrame.setFixedHeight(TopFrameFixedHight) if TopFrameFixedHight != None else None
+        self.TopFrame.setStyleSheet("background-color:transparent;")
+        self.horizontalLayout_2 = QHBoxLayout(self.TopFrame)
+        # self.MenuButton = QPushButton(self.TopFrame , text=" Menu")
+        # # self.MenuButton.setStyleSheet(Styles.BUTTON)
+        # self.MenuButton.setFlat(True)
+        # self.MenuButton.setShortcut("Ctrl+m")
+        # self.MenuButton.setFixedHeight(self.TopFrame.height()-15)
+        # self.MenuButton.setFixedWidth(50)
+        # self.horizontalLayout_2.addWidget(self.MenuButton, 1, Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignCenter)
+        self.MainLabel = QLabel(self.TopFrame)
+        self.MainLabel.setText("Statues")
+        self.horizontalLayout_2.addWidget(self.MainLabel, 4 ,Qt.AlignmentFlag.AlignCenter|Qt.AlignmentFlag.AlignCenter)
+        self.MiniButton = QPushButton(self.TopFrame)
+        self.MiniButton.setFlat(True)
+        self.MiniButton.setFixedSize(QSize(20,20))
+        self.MiniButton.setIcon(QIcon(MiniButtonIconPath)) if MiniButtonIconPath != None else None
+        self.horizontalLayout_2.addWidget(self.MiniButton, 0,Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignCenter)
+        self.MiniButton.clicked.connect(parent.parent().showMinimized)
+        self.MaxButton = QPushButton(self.TopFrame)
+        self.MaxButton.setFlat(True)
+        self.MaxButton.setFixedSize(QSize(20,20))
+        self.MaxButton.setIcon(QIcon(MaxButtonIconPath)) if MaxButtonIconPath != None else None
+        self.MaxButton.clicked.connect(lambda : self.max_mini(self.parent().parent(),MaxButtonIconPath,Mini_MaxButtonIconPath,ButtonsFrameFixedwidth))
+        self.horizontalLayout_2.addWidget(self.MaxButton, 0,Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignCenter)
+        self.ExitButton = QPushButton(self.TopFrame)        
+        self.ExitButton.setFlat(True)
+        self.ExitButton.setFixedSize(QSize(20,20))
+        self.ExitButton.setIconSize(QSize(20,20))
+        self.ExitButton.setIcon(QIcon(ExitButtonIconPath)) if ExitButtonIconPath != None else None
+        self.ExitButton.clicked.connect(parent.close)
+        self.ExitButton.clicked.connect(QCoreApplication.instance().quit)        
+        self.horizontalLayout_2.addWidget(self.ExitButton, 0, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignCenter)
+        self.horizontalLayout_2.setContentsMargins(5,5,6,5)
+        self.verticalLayout.addWidget(self.TopFrame)
+        self.BottomFrame = MyQFrame(parent)
+        self.BottomFrame.setStyleSheet("background-color:transparent;")
+        self.horizontalLayout = QHBoxLayout(self.BottomFrame)
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout.setSpacing(0)
+        self.ButtonsFrame = MyQFrame(self.BottomFrame)
+        self.ButtonsFrame.setStyleSheet("background-color:transparent;")
+        self.ButtonsFrame.setFixedWidth(ButtonsFrameFixedwidth) if ButtonsFrameFixedwidth != None else None
+        self.verticalLayout_2 = QVBoxLayout(self.ButtonsFrame)
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_2.setSpacing(ButtonsSpacing)
+        self.Buttons = [] #ButtonsList
+        for index in range(ButtonsCount) :
+            Button = MyQToolButton(self.ButtonsFrame)
+            Button.setText(f"Button {index}") 
+            Button.setAutoRaise(True)
+            sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+            sizePolicy.setHeightForWidth(Button.sizePolicy().hasHeightForWidth())
+            Button.setFixedHeight(ButtonsFixedHight) if ButtonsFixedHight != None else None
+            Button.setSizePolicy(sizePolicy)
+            if index == ButtonsCount - 1 :
+                self.verticalLayout_2.addWidget(Button ,1, Qt.AlignmentFlag.AlignTop)
+            else :
+                self.verticalLayout_2.addWidget(Button ,0, Qt.AlignmentFlag.AlignTop)
+            self.Buttons.append(Button)
+        # self.HideLabel = QLabel(self.ButtonsFrame)
+        # self.HideLabel.setText("Hide Browser")
+        # self.verticalLayout_2.addWidget(self.HideLabel,0,Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter)
+        # self.Hidetoggle = AnimatedToggle(self.ButtonsFrame)
+        # self.Hidetoggle.setShortcut("Ctrl+h")
+        # sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        # self.Hidetoggle.setSizePolicy(sizePolicy)
+        # self.verticalLayout_2.addWidget(self.Hidetoggle,0,Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter)
+        # self.DarkModeLabel = QLabel(self.ButtonsFrame)
+        # self.DarkModeLabel.setText("Dark~Mode")
+        # self.verticalLayout_2.addWidget(self.DarkModeLabel,0,Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter)
+        # self.DarkModetoggle = AnimatedToggle(self.ButtonsFrame)
+        # self.DarkModetoggle.setShortcut("Ctrl+d")
+        # self.DarkModetoggle.setCheckedColor("#c21919")
+        # sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        # self.DarkModetoggle.setSizePolicy(sizePolicy)
+        # self.verticalLayout_2.addWidget(self.DarkModetoggle,0,Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter)
+        self.horizontalLayout.addWidget(self.ButtonsFrame)
+        self.stackedWidget = QStackedWidget(self.BottomFrame)
+        self.Pages = []
+        for Page in range(PagesCount):
+            Page = QWidget()
+            self.stackedWidget.addWidget(Page)
+            self.Pages.append(Page)
+
+        self.horizontalLayout.addWidget(self.stackedWidget)
+        self.horizontalLayout.setStretch(0 , StretchMenuForStacked[0])
+        self.horizontalLayout.setStretch(1, StretchMenuForStacked[1])
+        self.verticalLayout.addWidget(self.BottomFrame)
+        self.verticalLayout.setStretch(0 ,StretchTopForBottomFrame[0])
+        self.verticalLayout.setStretch(1 , StretchTopForBottomFrame[1])
+        self.MAXWIDTH = self.ButtonsFrame.width()
+        self.NORMALWIDTH = self.MAXWIDTH
+        self.Animation = QPropertyAnimation(self,b"Width",self)
+        self.Animation.setDuration(Duration)
+        # self.MenuButton.setIcon(QIcon(DefultIconPath)) if DefultIconPath != None else None
+        self.ButtonsFrame.Enterd.connect(self.entered)
+        self.ButtonsFrame.Leaved.connect(self.leaved)
+        self.ButtonsFrame.setFixedWidth(self.ButtonsFrameFixedwidthMini)
+        self.setCurrentPage(0)
+    
+    
+    @pyqtProperty(int)
+    def Width(self):
+        return self.ButtonsFrame.width()
+    
+    @Width.setter
+    def Width(self,val):
+        self.ButtonsFrame.setFixedWidth(val)
+        
+    def leaved(self)-> None:
+        if self.ButtonsFrame.width() == self.MAXWIDTH :
+            self.Animation.setStartValue(self.ButtonsFrameFixedwidthMini)
+            self.Animation.setEndValue(self.MAXWIDTH)
+            self.Animation.setDirection(self.Animation.Direction.Backward)
+            self.Animation.start()
+    def entered(self):
+        if self.ButtonsFrame.width() != self.MAXWIDTH :
+            self.Animation.setStartValue(self.ButtonsFrameFixedwidthMini)
+            self.Animation.setEndValue(self.MAXWIDTH)
+            self.Animation.setDirection(self.Animation.Direction.Forward)
+            self.Animation.start()
+
+    @pyqtSlot(int,str)
+    def setButtonText(self,index:int,text:str)-> None:
+        self.Buttons[index].setText(text)
+
+    @pyqtSlot(int,str)
+    def setButtonIcon(self,index:int,IconPath:str)-> None:
+        self.Buttons[index].setIcon(QIcon(IconPath))
+        
+    def Connections(self,index:int,func):
+        self.Buttons[index].clicked.connect(func)
+
+    def GetButton(self,index:int)-> QPushButton:
+        return self.Buttons[index]
+
+    def GetPage(self,index:int)-> QWidget:
+        return self.Pages[index]
+
+    @pyqtSlot(int)
+    def setCurrentPage(self,index:int):
+        self.stackedWidget.setCurrentIndex(index)
+
+    def max_mini(self , parent:QMainWindow , path1:str , path2:str , Fixedwidth):
+        if parent.isMaximized():
+            parent.showNormal()
+            self.MaxButton.setIcon(QIcon(path1))
+            self.MAXWIDTH = self.NORMALWIDTH
+        else :
+            parent.showMaximized()
+            self.MaxButton.setIcon(QIcon(path2))
+            self.MAXWIDTH = Fixedwidth + 150 if Fixedwidth is int else 200
+
+
+class MyQToolButton(QToolButton):
+    Enterd = pyqtSignal()
+    Leaved = pyqtSignal()
+    __leavedString = ''
+    __entredString = ''
+
+    def __init__(self, parent: typing.Optional[QWidget] = ...) -> None:
+        super().__init__(parent)
+
+    def enterEvent(self, a0: QEvent) -> None:
+        self.Enterd.emit()
+        self.setText(self.__entredString)
+        return super().enterEvent(a0)
+        
+    def leaveEvent(self, a0: QEvent) -> None:
+        self.Leaved.emit()
+        self.setText(self.__leavedString)
+        return super().leaveEvent(a0)
+
+    def setTexts(self,leaved:str,entred:str):
+        self.__leavedString = leaved
+        self.__entredString = entred

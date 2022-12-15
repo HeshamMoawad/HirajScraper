@@ -53,8 +53,8 @@ class Styles():
     COMPOBOX="""
     QComboBox
 {
-	background-color: #c2c7d5;
-	color: #000;
+	background-color: transparent;
+	color: white;
 	font-weight: bold;
 	border: none;
 	border-radius: 2px;
@@ -98,7 +98,5 @@ class Styles():
     }
     
     
-    """#border: 2px groove;
-       #border-color: blue ;
-
+    """
 
