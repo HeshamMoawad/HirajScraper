@@ -35,3 +35,4 @@ Simple App to collect some data from "حراج" website that Collect Phone numbe
 
 #### v2.1 Update 
 ## Made By K7_Team Hesham
+#### You Can Only build .exe file with PyInstaller
