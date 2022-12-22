@@ -33,34 +33,33 @@ class Hiraj(BaseScrapingClassQt5):
         else:
             self.driver.get(f"https://haraj.com.sa/search/{keyword}")
 
+    def scroll(self):
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+
 
     def scrape_links(self,limit:int)->list:
-        posts = []
         links = []
-        lengthofposts = None
-        while len(posts) < limit :
-            print(f"{len(posts) < limit} while loop in scrape_links")
-            lengthofposts = len(posts)
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            sleep(1)
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        oldlen = 0
+        while True : 
+            oldlen = len(links)
+            self.scroll()
             try:
-                self.wait_elm("//button[@data-testid='posts-load-more']",timeout=6).click()
-                sleep(1)
-                posts = self.driver.find_elements(By.XPATH,"//a[@data-testid='post-title-link']")
-                if lengthofposts == len(posts):
-                    print(f"Breaked in while loop {lengthofposts == len(posts)}")
-                    break
+                self.wait_elm('//button[@data-testid="posts-load-more"]',timeout=3).click()
             except Exception as e :
-                posts = self.driver.find_elements(By.XPATH,"//a[@data-testid='post-title-link']")
-                print(f"Breaked in Exception {e}")
+                print("No Button More Found --- ")
+            sleep(3)
+            self.scroll()
+            posts = self.wait_elms('//a[@data-testid="post-title-link"]',timeout=5)
+            links = [x.get_attribute('href') for x in posts]
+            if len(links) >= limit or oldlen == len(links):
+                print(f"Breaked succecfully lenlinks = {len(links)} && oldlen = {oldlen} && limit = {limit}")
                 break
-        posts = self.driver.find_elements(By.XPATH,"//a[@data-testid='post-title-link']")
-        for elm in posts:
-            link = elm.get_attribute("href")
-            links.append(link)
+            print(len(links))
         return links
-            
+
+
+
 
     def exist(self,table,column,val):
         self.cur.execute(f"""SELECT * FROM {table} WHERE {column} = '{val}'; """)
@@ -112,57 +111,62 @@ class Hiraj(BaseScrapingClassQt5):
         scrapeComent:bool ,
         ):
         self.driver.get(link)
-        postTitle = self.wait_elm('//h1[@data-testid="post_title"]').text
-        postID = self.driver.current_url.replace("https://haraj.com.sa/","").split("/")[0]
-        if not self.exist(
-            table = "maindata",
-            column = "PostID",
-            val = postID
-        ):
-            author = self.wait_elm('//a[@data-testid="post-author"]').text
-            city = self.wait_elm('//span[@class="city"]').text
-            article = self.wait_elm('//article[@data-testid="post-article"]').text
-            phoneNumber = self.get_Phone()
-            lead = {
-                'PostID':int(postID) ,
-                'Author' : author ,
-                'PhoneNumber' : phoneNumber ,
-                'PostTitle' : postTitle ,
-                'City' : city ,
-                'Article' : article ,
-                'date' : f'{datetime.now().now()}',
-            }
-            self.add_to_db(
-                'maindata',
-                **lead
-                )
-            print(lead)
-            if '5' in phoneNumber and not self.exist(table='leads',column='PhoneNumber',val = phoneNumber) :
+        try:
+            postTitle = self.wait_elm('//h1[@data-testid="post_title"]',timeout=10).text
+            con = True
+        except Exception as e :
+            con = False
+        if con :
+            postID = self.driver.current_url.replace("https://haraj.com.sa/","").split("/")[0]
+            if not self.exist(
+                table = "maindata",
+                column = "PostID",
+                val = postID
+            ):
+                author = self.wait_elm('//a[@data-testid="post-author"]').text
+                city = self.wait_elm('//span[@class="city"]').text
+                article = self.wait_elm('//article[@data-testid="post-article"]').text
+                phoneNumber = self.get_Phone()
+                lead = {
+                    'PostID':int(postID) ,
+                    'Author' : author ,
+                    'PhoneNumber' : phoneNumber ,
+                    'PostTitle' : postTitle ,
+                    'City' : city ,
+                    'Article' : article ,
+                    'date' : f'{datetime.now().now()}',
+                }
                 self.add_to_db(
-                    'leads',
+                    'maindata',
                     **lead
-                )
-                valid = Validation.Numbers(phoneNumber)
-                print(valid.saudiNumberCountryCode())
-                self.LeadSignal.emit([
-                    author,
-                    valid.saudiNumberCountryCode() ,
-                    city ,
-                ])
+                    )
+                print(lead)
+                if '5' in phoneNumber and not self.exist(table='leads',column='PhoneNumber',val = phoneNumber) :
+                    self.add_to_db(
+                        'leads',
+                        **lead
+                    )
+                    valid = Validation.Numbers(phoneNumber)
+                    print(valid.saudiNumberCountryCode())
+                    self.LeadSignal.emit([
+                        author,
+                        valid.saudiNumberCountryCode() ,
+                        city ,
+                    ])
 
-            if scrapeComent :
-                try:
-                    comments = self.wait_elms('//a[@class="ml-2"]',timeout=3)
-                    comments = [x.get_attribute('href') for x in comments]
-                    result = []
-                    comments = [result.append(x) for x in comments if x not in result]
-                    for link in result :
-                        self.get_Commenter_Info(link)
-                except Exception as e :
-                    pass
-            return True if '5' in phoneNumber else False
-        else :
-            return True
+                if scrapeComent :
+                    try:
+                        comments = self.wait_elms('//a[@class="ml-2"]',timeout=3)
+                        comments = [x.get_attribute('href') for x in comments]
+                        result = []
+                        comments = [result.append(x) for x in comments if x not in result]
+                        for link in result :
+                            self.get_Commenter_Info(link)
+                    except Exception as e :
+                        pass
+                return True if '5' in phoneNumber else False
+            else :
+                return True
         
 
 

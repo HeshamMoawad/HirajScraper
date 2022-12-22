@@ -49,6 +49,7 @@ class Ui_MainWindow(object):
             MiniButtonIconPath="Data\Icons\delete.png",
             ButtonsFixedHight=40 ,
             ButtonsFrameFixedwidthMini= 40 ,
+            Duration = 250,
         )   
         # Stytles -----------
         self.Menu.TopFrame.setStyleSheet(Styles.PALET)
@@ -85,12 +86,14 @@ class Ui_MainWindow(object):
         self.ButtonStart = QtWidgets.QPushButton(self.frameButtons)
         self.ButtonStop = QtWidgets.QPushButton(self.frameButtons)
         self.ButtonStart.setText("Start")
+        self.ButtonStop.setShortcut('space')
         self.ButtonStop.setText("Stop")
         self.ButtonStop.setIcon(QtGui.QIcon("Data/Icons/no-stopping.png"))
         self.ButtonStart.setIcon(QtGui.QIcon("Data/Icons/play.png"))
         self.ButtonStart.setFlat(True)
         self.ButtonStop.setFlat(True)
         self.Hframe.addWidget(self.ButtonStart)
+        self.ButtonStart.setShortcut("enter")
         self.Hframe.addWidget(self.ButtonStop)
         self.gridLayout.addWidget(self.frameButtons)
         self.gridLayout.addWidget(self.treewidget)
@@ -213,7 +216,7 @@ class Ui_MainWindow(object):
         self.gridLayout.setContentsMargins(0,0,0,0)
         self.treewidget.setColumns(["Username","Phone number","Location"])
         self.treewidget.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.ButtonStart.setDisabled(True)
+        # self.ButtonStart.setDisabled(True)
         self.handles_list = []
         ## Connection 
         self.ButtonDashBoard.clicked.connect(lambda : self.Menu.setCurrentPage(1))
@@ -289,22 +292,23 @@ class Ui_MainWindow(object):
         if "https://haraj.com.sa" in self.lineEdit_2.text():
             self.groupBox_2.setDisabled(True)
             self.groupBox.setDisabled(False)
-            self.ButtonStart.setDisabled(False)
+            # self.ButtonStart.setDisabled(False)
         else :
             self.groupBox_2.setDisabled(False)
             self.groupBox.setDisabled(False)
-            self.ButtonStart.setDisabled(False)
+            # self.ButtonStart.setDisabled(False)
 
     def disabled(self):
         if len(self.lineEdit.text()) >= 1 :
             self.groupBox.setDisabled(True)
             self.groupBox_2.setDisabled(False)
             if self.spinBox.value() != 0 :
-                self.ButtonStart.setDisabled(False)
+                pass
+                # self.ButtonStart.setDisabled(False)
         else :
             self.groupBox_2.setDisabled(False)
             self.groupBox.setDisabled(False)
-            self.ButtonStart.setDisabled(True)
+            # self.ButtonStart.setDisabled(True)
 
     def counter(self,count):
         self.countlabel.setText("\tCount : "+f"{count}")
@@ -337,11 +341,6 @@ class Ui_MainWindow(object):
 
 
         
-
-
-
-
-
     def add_to_db(self , **kwargs):
         try:
             self.curser.execute(f"""
@@ -397,8 +396,8 @@ class ThreadLink(QThread):
                 comntusersdata.append(infocomntuser[:4])
                 self.lead.emit([infocomntuser,[]])
         self.hiraj.exit()
-        self.message.emit(" Scrape Ending ^_^ ")
-        self.statues.emit(" Scrape Ending ^_^ ")
+        self.message.emit("خلصت يا رجوله")
+        self.statues.emit("خلصت يا رجوله")
         
     def kill(self):
         if self.isRunning() :
@@ -457,9 +456,8 @@ class Thread(QThread):
                 )
 
             self.hiraj.exit()
-            self.message.emit(" Scrape Ending ^_^ ")
-            self.statues.emit(" Scrape Ending ^_^ ")
-
+            self.message.emit("خلصت يا رجوله")
+            self.statues.emit("خلصت يا رجوله")
 
 
 
@@ -496,16 +494,8 @@ class Thread(QThread):
 
 
 if __name__ == "__main__":
-
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    app_icon = QtGui.QIcon()
-    app_icon.addFile('Data\Icons\logo.png', QtCore.QSize(16,16))
-    app_icon.addFile('Data\Icons\logo.png', QtCore.QSize(24,24))
-    app_icon.addFile('Data\Icons\logo.png', QtCore.QSize(32,32))
-    app_icon.addFile('Data\Icons\logo.png', QtCore.QSize(48,48))
-    app_icon.addFile('Data\Icons\logo.png', QtCore.QSize(256,256))
-    app.setWindowIcon(app_icon)
     MainWindow = QtWidgets.QMainWindow()
     global ui
     ui = Ui_MainWindow()
