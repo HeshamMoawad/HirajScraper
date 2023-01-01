@@ -26,12 +26,16 @@ class Hiraj(BaseScrapingClassQt5):
     def search(self,keyword:str,**kwargs):
         if "tagname" and "city" in kwargs.keys():
             self.driver.get(f"https://haraj.com.sa/search/{keyword}/city/{kwargs['city']}?&tag={kwargs['tagname']}")
+            print(f"https://haraj.com.sa/search/{keyword}/city/{kwargs['city']}?&tag={kwargs['tagname']}")
         elif "city" in kwargs.keys():
             self.driver.get(f"https://haraj.com.sa/search/{keyword}/city/{kwargs['city']}")
+            print(f"https://haraj.com.sa/search/{keyword}/city/{kwargs['city']}")
         elif "tagname" in kwargs.keys():
             self.driver.get(f"https://haraj.com.sa/search/{keyword}?&tag={kwargs['tagname']}")
+            print(f"https://haraj.com.sa/search/{keyword}?&tag={kwargs['tagname']}")
         else:
             self.driver.get(f"https://haraj.com.sa/search/{keyword}")
+            print(f"https://haraj.com.sa/search/{keyword}")
 
     def scroll(self):
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -50,7 +54,11 @@ class Hiraj(BaseScrapingClassQt5):
                 print("No Button More Found --- ")
             sleep(3)
             self.scroll()
-            posts = self.wait_elms('//a[@data-testid="post-title-link"]',timeout=5)
+            try:
+                posts = self.wait_elms('//a[@data-testid="post-title-link"]',timeout=5)
+            except Exception as e :
+                posts = []
+                print("\nNo ADS Founded ----------- \n")
             links = [x.get_attribute('href') for x in posts]
             if len(links) >= limit or oldlen == len(links):
                 print(f"Breaked succecfully lenlinks = {len(links)} && oldlen = {oldlen} && limit = {limit}")
@@ -76,10 +84,10 @@ class Hiraj(BaseScrapingClassQt5):
             print(f"\n{e} \nError in Database \n")
 
     def get_Phone(self)->str:
-        self.wait_elm('//button[@data-testid="post-contact"]').click()
+        self.wait_elm('//button[@data-testid="post-contact"]',timeout= 8 ).click()
         sleep(3)
-        phone = self.wait_elm('//a[@data-testid="contact_mobile"]//div[@dir="ltr"]').text
-        self.wait_elm('//*[@data-icon="times"]').click()
+        phone = self.wait_elm('//a[@data-testid="contact_mobile"]//div[@dir="ltr"]' , timeout= 8).text
+        self.wait_elm('//*[@data-icon="times"]',timeout=8).click()
         return phone
 
     def get_Commenter_Info(

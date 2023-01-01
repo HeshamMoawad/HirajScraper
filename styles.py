@@ -1,6 +1,5 @@
 
 
-
 class Styles():
     PALET = """
     color:white;
