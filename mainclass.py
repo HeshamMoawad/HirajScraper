@@ -1,27 +1,12 @@
 from time import  sleep
-# from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-# from webdriver_manager.chrome import ChromeDriverManager
-# from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.remote.webelement import WebElement
 from datetime import datetime
-from typing import List
-from MyPyQt5 import BaseScrapingClassQt5 , Validation
+from MyPyQt5 import BaseScrapingClassQt5 , Validation , DataBase
 
 
-class Hiraj(BaseScrapingClassQt5):
-    def wait_elm(self,val:str,by:str=By.XPATH,timeout:int=5)->WebElement:
-        self.wait = WebDriverWait(self.driver, timeout=timeout)
-        arg = (by,val)
-        return self.wait.until(EC.presence_of_element_located(arg))
-
-    def wait_elms(self,val:str,by:str=By.XPATH,timeout:int=30)->List[WebElement]:
-        self.wait = WebDriverWait(self.driver, timeout=timeout)
-        arg = (by,val)
-        elments = self.wait.until(EC.presence_of_all_elements_located(arg))
-        return elments
+class Hiraj(BaseScrapingClassQt5,DataBase):
+    def __init__(self, url: str, loginElementXpath: str, headless: bool = False, darkMode: bool = False, userProfile: str = "Guest") -> None:
+        DataBase().__init__()
+        super().__init__(url, loginElementXpath, headless, darkMode, userProfile)
 
     def search(self,keyword:str,**kwargs):
         if "tagname" and "city" in kwargs.keys():
@@ -37,23 +22,19 @@ class Hiraj(BaseScrapingClassQt5):
             self.driver.get(f"https://haraj.com.sa/search/{keyword}")
             print(f"https://haraj.com.sa/search/{keyword}")
 
-    def scroll(self):
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-
 
     def scrape_links(self,limit:int)->list:
         links = []
         oldlen = 0
         while True : 
             oldlen = len(links)
-            self.scroll()
+            self.NormalScroll()
             try:
                 self.wait_elm('//button[@data-testid="posts-load-more"]',timeout=3).click()
             except Exception as e :
                 print("No Button More Found --- ")
             sleep(3)
-            self.scroll()
+            self.NormalScroll()
             try:
                 posts = self.wait_elms('//a[@data-testid="post-title-link"]',timeout=5)
             except Exception as e :
@@ -66,22 +47,6 @@ class Hiraj(BaseScrapingClassQt5):
             print(len(links))
         return links
 
-
-
-
-    def exist(self,table,column,val):
-        self.cur.execute(f"""SELECT * FROM {table} WHERE {column} = '{val}'; """)
-        return True if self.cur.fetchall() != [] else False
-
-    def add_to_db(self,table,**kwargs):
-        try:
-            self.cur.execute(f"""
-            INSERT INTO {table} {str(tuple(kwargs.keys())).replace("'","")}
-            VALUES {tuple(kwargs.values())}; 
-            """)
-            self.con.commit()
-        except Exception as e:
-            print(f"\n{e} \nError in Database \n")
 
     def get_Phone(self)->str:
         self.wait_elm('//button[@data-testid="post-contact"]',timeout= 8 ).click()

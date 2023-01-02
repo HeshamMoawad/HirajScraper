@@ -1,5 +1,16 @@
-from MyPyQt5 import MyQMainWindow,MyMessageBox,MyThread,QSideMenuEnteredLeaved , QIcon ,QSize
+from MyPyQt5 import (MyQMainWindow,
+                    MyMessageBox,
+                    MyThread,
+                    QSideMenuEnteredLeaved , 
+                    QIcon ,
+                    QSize,
+                    QShortcut,
+                    QKeySequence ,
+                    pyqtSignal
+                    )
+
 from pages import Page1 , Page2
+
 
 class Window(MyQMainWindow):
     msg = MyMessageBox()
@@ -41,9 +52,31 @@ class Window(MyQMainWindow):
             pageIndex = 1 ,
         )
 
+        self.startShort = QShortcut(QKeySequence("enter"),self)
+        self.startShort.activated.connect(self.op)
+        
+        self.Thread = MainThread()
+        self.Thread.setMainClass(self)
+        self.Thread.statues.connect(self.Menu.MainLabel.setText)
+        self.Thread.lead.connect(self.Page1.treeWidget.appendData)
+
+
         self.Menu.setCurrentPage(0)
         return super().SetupUi()
 
+    def op(self):
+        print("hi")
+
+class MainThread(MyThread):
+    lead = pyqtSignal(list)
+
+    def run(self) -> None:
+        pass
+        #self.setMainClass(Window)
+        
+        #return super().run()
+
+    
 
 
 

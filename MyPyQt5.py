@@ -9,15 +9,16 @@ from PyQt5.QtWidgets import *
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import  NoSuchElementException
-import random
 from MyPyQt5 import QThread,QObject,pyqtSignal
 import typing , time , sqlite3 , datetime , os
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 
@@ -541,28 +542,6 @@ class MyCustomContextMenu(QObject):
 
 
 
-## ------------- Custom Thread class
-class MyThread(QThread):
-    statues = pyqtSignal(str)
-    def __init__(self) -> None:
-        super().__init__()
-        self.msg = MyMessageBox()
-
-    def kill(self,msg:typing.Optional[bool]):
-        """Method to kill Thread when it Running"""
-        if self.isRunning():
-            self.terminate()
-            self.wait()
-            if msg:
-                self.msg.showInfo(text="سيبونا ناخد فرصتنا بقى")
-
-    def start(self, priority: 'QThread.Priority' = ...) -> None:
-        """Method to start Thread when it NotRunning"""
-        if self.isRunning():
-            pass
-        else:
-            return super().start(priority)
-
 
 ## ------------ QMainWindow custom widget
 class MyQMainWindow(QMainWindow):
@@ -609,10 +588,36 @@ class MyQMainWindow(QMainWindow):
         self.App.setWindowIcon(app_icon)
     
 ## ---------------------- Validation some texts 
+
 class Validation(object):
+    class Numbers(object):
+        def __init__(self,phone:str) -> None:
+            self.__phone = phone
+        def __len__(self):
+            return len(self.__phone)
+        def setPhone(self,phone:str)-> None :
+            self.__phone = phone
+        @property 
+        def phone(self) -> str :
+            return self.__phone
+        @property
+        def length(self):
+            return len(self.__phone)
+        def saudiNumberCountryCode(self) -> str:
+            if self.length > 13 : # +9660557888738
+                return self.__phone[:4]+self.__phone[6:]
+            elif self.length > 12 and "+" in self.__phone: # +966557888738
+                return self.__phone
+            elif self.length > 12 and "+" not in self.__phone: # 9660557888738
+                return self.__phone
+            elif self.length > 11 and "+" not in self.__phone : # 966557888738
+                return "+" + self.__phone
+            elif self.length > 9 : # 0557888738
+                return "+966" + self.__phone[1:]
+            elif self.length > 8 : # 557888738
+                return "+966" + self.__phone
 
-    class TelegramValidation(object):
-
+    class Telegram(object):
         def channelNameOrLinkToHandle(self,text:str)->str:
             """This Method takes TelegramLink or TelegramHandle and Returns into Handle 
             examples :
@@ -760,7 +765,19 @@ class BaseScrapingClassQt5(QObject):
         """To exit webdriver"""
         self.driver.quit()
 
+    def wait_elm(self,val:str,by:str=By.XPATH,timeout:int=5)->WebElement:
+        self.wait = WebDriverWait(self.driver, timeout=timeout)
+        arg = (by,val)
+        return self.wait.until(EC.presence_of_element_located(arg))
 
+    def wait_elms(self,val:str,by:str=By.XPATH,timeout:int=30)->typing.List[WebElement]:
+        self.wait = WebDriverWait(self.driver, timeout=timeout)
+        arg = (by,val)
+        elments = self.wait.until(EC.presence_of_all_elements_located(arg))
+        return elments
+
+    def NormalScroll(self):
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
 ########################################################################
 
@@ -1021,6 +1038,31 @@ class QSideMenuEnteredLeaved(QWidget):
     def connect_Button_Page(self,btn:MyQToolButton,pageIndex:int):
         btn.clicked.connect(lambda : self.setCurrentPage(pageIndex))
         
+
+
+## ------------- Custom Thread class
+class MyThread(QThread):
+    statues = pyqtSignal(str)
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.msg = MyMessageBox()
+    def setMainClass(self,mainClass:BaseScrapingClassQt5):
+        self.mainClass = mainClass
+
+    def kill(self,msg:typing.Optional[bool]):
+        """Method to kill Thread when it Running"""
+        if self.isRunning():
+            self.terminate()
+            self.wait()
+            if msg:
+                self.msg.showInfo(text="سيبونا ناخد فرصتنا بقى")
+
+    def start(self, priority: 'QThread.Priority' = ...) -> None:
+        """Method to start Thread when it NotRunning"""
+        if self.isRunning():
+            pass
+        else:
+            return super().start(priority)
+
 ###################################################
-
-

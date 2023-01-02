@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 from MyPyQt5 import QObject , MyQTreeWidget , QIcon, QSize , MyCustomContextMenu,MyMessageBox
-import os , openpyxl,pandas,pyperclip
+import os , openpyxl,pandas,pyperclip,typing
+from datetime import datetime
 
 
 class Page1(QObject):
@@ -8,7 +9,7 @@ class Page1(QObject):
     CATEGORIES = ['حراج السيارات', 'حراج العقار', 'حراج الأجهزة', 'مواشي وحيوانات وطيور', 'اثاث', 'مستلزمات شخصية', 'خدمات', 'وظائف', 'اطعمة ومشروبات', 'برمجة وتصاميم', 'مكتبة وفنون', 'صيد ورحلات']
     SUBCATEGORY = [['', 'هونشي', 'زوتي', 'ماهيندرا', 'ساوايست', 'تسلا', 'بايك', 'جاك JAC', 'ماكلارين', 'ماكسيس', 'ليفان', 'فيكتوري اوتو', 'فوتون', 'سي ام سي', 'جيتور', 'جى ام سي JMC', 'تاتا', 'الفا روميو', 'BYD', 'فاو FAW', 'جريت وول Great Wall', 'جي ايه سي GAC', 'هافال', 'بروتون', 'استون مارتن', 'سانج يونج', 'فيات', 'ساب', 'دايو', 'سيات', 'تشيري', 'سيتروين', 'فيراري', 'سكودا', 'اوبل', 'لامبورجيني', 'رولز رويس', 'مازيراتي', 'بيوك', ' رينو', 'شانجان', 'ZXAUTO', 'MG', 'سوبارو', 'جاكوار', 'بنتلي', 'بيجو', 'فولفو', 'ميركوري', 'جيلي', 'ديهاتسو', 'فولكس واجن', 'لنكولن', 'همر', 'انفنيتي', 'سوزوكي', 'اودي', 'بورش', 'كاديلاك', 'ايسوزو', 'لاند روفر', 'مازدا', 'ميتسوبيشي', 'جيب','كرايزلر', 'دودج', 'كيا', 'دبابات', 'بي ام دبليو', 'هوندا', 'مرسيدس', 'شاحنات ومعدات ثقيلة', 'جي ام سي', 'لكزس', 'جنسس', 'هونداي', 'نيسان', 'قطع غيار وملحقات', 'شيفروليه', 'فورد', 'تويوتا'], ['', 'بيوت للايجار', 'ادوار للايجار', 'مزارع للبيع', 'فلل للايجار', 'استراحات للبيع', 'عماره للايجار', 'محلات للايجار', 'محلات للتقبيل', 'استراحات للايجار', 'عمارة للبيع', 'اراضي تجارية للبيع', 'بيوت للبيع', 'شقق للبيع', 'فلل للبيع', 'شقق للايجار', 'اراضي للبيع'], ['', 'غسالة سامسونج', 'ثلاجة سامسونج', 'اجهزة غير مصنفة', 'هيتاشي Hitachi', 'باناسونيك Panasonic', 'مايكروسوفت Microsoft', 'ال جي LG', 'أرقام مميزة', 'حسابات واشتراكات', 'كاميرات تصوير', 'تلفزيونات وصوتيات', 'ألعاب إلكترونية', 'أجهزة كمبيوتر', 'أجهزة تابلت', 'جوالات'], ['', 'وبر', 'هامستر', 'سناجب', 'بط', 'ارانب', 'أسماك وسلاحف', 'بقر', 'كلاب', 'خيل', 'أبل', 'دجاج', 'قطط', 'حمام', 'ببغاء', 'ماعز', 'غنم'], ['', 'مجالس ومفروشات', 'طاولات وكراسي', 'خزائن ودواليب', 'تحف وديكور', 'أسرة ومراتب', 'أدوات منزلية', 'أثاث مكتبي', 'أثاث خارجي'], ['', 'ملابس أطفال', 'ملابس نسائية', 'ملابس رجالية', 'نظارات', 'مستلزمات رياضية', 'عطورات', 'ساعات'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات','زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفروسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['']]
     AREAS = ["كل المناطق","الرياض","الشرقيه","جده","مكه","ينبع","حفر الباطن","المدينة","الطايف","تبوك","القصيم","حائل","أبها","عسير","الباحة","جيزان","نجران","الجوف","عرعر","الكويت","الإمارات","البحرين"]
-    
+    Name = ""
     def __init__(self, parent):
         super().__init__()
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(parent)
@@ -107,13 +108,38 @@ class Page1(QObject):
     def Menu(self):
         menu = MyCustomContextMenu(
             Actions_arg=[
-                #ssss
+                "Copy Number", # 1
+                "Copy Number List",  # 2
+                "Delete Row", # 3
+                "Export To Excel", # 4
             ]
         )
         menu.multiConnect(functions=[
-            #dddd
+            lambda: self.copy(1) ,
+            lambda : pyperclip.copy(self.treeWidget.extract_data_to_string(1)) if self.treeWidget._ROW_INDEX != 0 else self.msg.showWarning(text="No Data In Column !") ,
+            lambda: self.delete() ,
+            lambda : self.export(self.Name),
         ])
         menu.show()
+
+    def copy(self , index:int):
+        try :
+            pyperclip.copy(self.treeWidget.currentItem().text(index))
+        except :
+            self.msg.showWarning(text="No Item Selected please Select one !")
+
+    def delete(self):
+        try:
+            self.treeWidget.takeTopLevelItem(self.treeWidget.indexOfTopLevelItem(self.treeWidget.currentItem()))
+        except:
+            self.msg.showWarning(text="No Item Selected please Select one !")
+
+    def export(self,name:typing.Optional[str]):
+        if self.treeWidget._ROW_INDEX > 0 :
+            self.treeWidget.extract_data_to_DataFrame().to_excel(f"Data/Exports/{name}[{datetime.now().date()}].xlsx",index=False)
+            self.msg.showInfo(text=f"Exported Succecfully to 'Data/Exports/{name}[{datetime.now().date()}].xlsx'")
+        else :
+            self.msg.showWarning(text="No Data In App Please Try Again Later")
 
 
 
@@ -151,8 +177,6 @@ class Page2(QObject):
         self.label_2.setText("NumbersCount : 0")
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.horizontLayout.addWidget(self.label_2)
-
-    
         self.treeWidget.setColumns(["Sheet Name","Numbers Count"])
         self.treeWidget.setColumnWidth(0,250)
         self.treeWidget.setColumnWidth(1,150)
@@ -231,6 +255,5 @@ class Page2(QObject):
         total = 0
         for sheet in range(self.treeWidget._ROW_INDEX):
             total += int(self.treeWidget.topLevelItem(sheet).text(1))
-            #print(total)
         return total
         
