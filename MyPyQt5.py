@@ -688,13 +688,13 @@ class DataBase():
         self.cur = self.con.cursor()
 
 
-    def exist(self,column,val):
+    def exist(self,table,column,val):
         """
         Check if this Value is exist or not \n
         1- If value is exist that will return -> True \n
         2- If value is not exist that will return -> False
         """
-        self.cur.execute(f"""SELECT * FROM data WHERE {column} = '{val}'; """)
+        self.cur.execute(f"""SELECT * FROM {table} WHERE {column} = '{val}'; """)
         return True if self.cur.fetchall() != [] else False
     
     

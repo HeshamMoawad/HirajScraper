@@ -8,11 +8,7 @@
             "page": null,
             "limi": null,
             "tag": null,
-            "id": [
-                109666696,
-                109665928,
-                109665946
-            ],
+            "id": [],
             "orderMainByPostId": false
         }
     },
@@ -36,6 +32,30 @@
         "variables": {
             "id": 109666665
         }
+    },
+    "Search": {
+        "query": "\n    query Search($id: [Int], $cities: [String], $search: String!, $city: String, $authorUsername: String, $page: Int, $limit: Int, $afterPostDate: Int, $afterUpdateDate: Int, $tag: String, $tags: [String], $carExtraInfo: CarExtraInfo, $near: String, $onlyWithImage: Boolean, $duringDate: String, $userLocation: GeoPoint, $notTag: String, $hideShowRooms: Boolean, $orderByPostId: Boolean) {\n  search(\n    id: $id\n    search: $search\n    city: $city\n    cities: $cities\n    authorUsername: $authorUsername\n    page: $page\n    limit: $limit\n    afterPostDate: $afterPostDate\n    afterUpdateDate: $afterUpdateDate\n    tag: $tag\n    tags: $tags\n    CarExtraInfo: $carExtraInfo\n    near: $near\n    onlyWithImage: $onlyWithImage\n    userLocation: $userLocation\n    duringDate: $duringDate\n    notTag: $notTag\n    hideShowRooms: $hideShowRooms\n    orderByPostId: $orderByPostId\n  ) {\n    items {\n      id\n      authorUsername\n      authorId\n      hasImage\n      title\n      URL\n      icon\n      city\n      geoCity\n      geoNeighborhood\n      geoHash\n      commentCount\n      commentEnabled\n      thumbURL\n      bodyHTML\n      bodyTEXT\n      imagesList\n      tags\n      postDate\n      updateDate\n      status\n      upRank\n      downRank\n    }\n    pageInfo {\n      hasNextPage\n    }\n  }\n}\n    ",
+        "variables": {
+            "tag": "مستلزمات شخصية",
+            "correctedWords": [],
+            "search": "ملابس",
+            "orderByPostId": false,
+            "page": 2,
+            "cities": [
+                "الرياض"
+            ]
+        }
+    },
+    "Profile": {
+        "query": "query profile($id: ID!) {\n    \n  profile(id: $id)\n  { \n    id\n    handler\n    type\n    description\n    pages {\n      id\n      title\n      order\n      content\n    }\n    locations {\n        id\n        value\n        description\n    }\n    contacts {\n        id\n        description\n        info\n        type\n    }\n    verifications {\n        id\n        type\n        status\n        data\n    }\n    updatedAt \n }\n  \n  }",
+        "variables": {
+            "id": 2836074
+        }
+    },
+    "user": {
+        "query": "query user($username: String) {\n    \n  user(username: $username)\n  { \n\t\tid\n\t\tusername\n\t\tregistrationDate\n\t\tmobile\n\t\tdiscount\n\t\tisMember\n\t\tisAdmin\n\t\tisBlocked\n\t\tdidPay\n\t\tlastSeen\n\t\tcountFollowers\n\t\tratingSummery {\n        upRank\n        downRank\n        rateAverage\n\t\t}\n\t\tbadges {\n\t\t    badge\n\t\t}\n }\n  \n  }",
+        "variables": {
+            "username": "شركة دائرة التشييدللمقاولات"
+        }
     }
-    
 }
