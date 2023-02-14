@@ -1,0 +1,41 @@
+{
+    "FetchAds": {
+        "query": "\n    query FetchAds($isRe: Boolean = true, $id: [Int] = null, $city: String = null, $cities: [String], $authorUsername: String = null, $page: Int = null, $limit: Int = null, $afterPostDate: Int = null, $afterUpdateDate: Int = null, $beforeUpdateDate: Int = null, $beforePostDate: Int = null, $tag: String = null, $near: String = null, $onlyWithImage: Boolean = null, $orderMainByPostId: Boolean = null, $notTag: String = null) {\n  posts(\n    id: $id\n    city: $city\n    cities: $cities\n    authorUsername: $authorUsername\n    page: $page\n    limit: $limit\n    afterPostDate: $afterPostDate\n    afterUpdateDate: $afterUpdateDate\n    beforeUpdateDate: $beforeUpdateDate\n    beforePostDate: $beforePostDate\n    tag: $tag\n    near: $near\n    onlyWithImage: $onlyWithImage\n    orderMainByPostId: $orderMainByPostId\n    notTag: $notTag\n  ) {\n    items {\n      id\n      title\n      postDate\n      updateDate\n      authorUsername\n      authorId\n      URL\n      bodyTEXT\n      bodyHTML\n      thumbURL\n      hasImage\n      city\n      geoCity\n      geoNeighborhood\n      geoHash\n      tags\n      imagesList\n      commentEnabled\n      commentCount\n      upRank\n      downRank\n      status\n      postType\n      price {\n        formattedPrice\n      }\n      realEstateInfo @include(if: $isRe) {\n        ...realEstateOptions\n      }\n    }\n    pageInfo {\n      hasNextPage\n    }\n  }\n}\n    \n    fragment realEstateOptions on reInfo {\n  re_AdvertiserType\n  re_Direction\n  re_StreetType\n  re_AccommType\n  re_IsKitchenIncluded\n  re_IsFurnished\n  re_IsDriverRoomAvilable\n  re_IsMaidRoomAvilable\n  re_IsFireRoomAvilable\n  re_IsOutsideRoomAvilable\n  re_IsCarGateAvilable\n  re_IsElevatorAvilable\n  re_IsParkingAvilable\n  re_IsCellarIncludedAvilable\n  re_IsGardenAvilable\n  re_IsACIncludedAvilable\n  re_IsPoolAvilable\n  re_IsVolleyBallAvilable\n  re_IsFootBallAvilable\n  re_IsKidsGamesAvilable\n  re_IsStairInsideAvilable\n  re_IsYardAvilable\n  re_IsBooked\n  re_Area\n  re_PropertyAge\n  re_StreetWide\n  re_RoomCount\n  re_LivingRoomCount\n  re_WCCount\n  re_ApartmentCount\n  re_CheckInDate\n  re_CheckOutDate\n  re_VillaCount\n  re_PlanNum\n  re_LandNum\n  re_MachineCount\n  re_PalmCount\n  re_MeterPrice\n  re_FloorNum\n  re_REGA_Advertiser_registration_number\n  re_REGA_Authorization_number\n  re_VillaType\n  re_IsOutdoorSessionsAvailable\n  re_IsLivingRoomAvailable\n  re_IsTransformerAvailable\n  re_IsWCAvailable\n  re_IsStageAvailable\n  re_IsStorehouseAvailable\n  re_IsWaterAvailable\n  re_IsProtectoratesAvailable\n  re_IsElectricityAvailable\n  re_IsPrivateHallAvailable\n  re_IsPrivateEntranceAvailable\n  re_IsWorkersHouseAvailable\n  re_IsTentHouseAvailable\n  re_IsFoodHallAvailable\n  re_IsTwoDepartment\n  re_IsWaterTankAvailable\n  re_IsPrivateHouseAvailable\n  re_IsBridalDepartmentAvailable\n  re_IsPlowAvailable\n  re_IsGymAvailable\n  re_IsWaterSprinklerAvailable\n  re_TentCount\n  re_WellsCount\n  re_HallsCount\n  re_FloorsCount\n  re_TentHouseCount\n  re_SessionsCount\n  re_ShopsCount\n  re_SupportDailyRentSystem\n  re_SupportMonthlyRentSystem\n  re_SupportYearlyRentSystem\n}\n    ",
+        "variables": {
+            "isRe": true,
+            "city": null,
+            "authorUsername": null,
+            "page": null,
+            "limi": null,
+            "tag": null,
+            "id": [
+                109666696,
+                109665928,
+                109665946
+            ],
+            "orderMainByPostId": false
+        }
+    },
+    "comments": {
+        "query": "query comments($postId: Int!, $page: Int, $token: String) {\n    \n  comments(postId: $postId, page: $page, token: $token)\n  { \n    items {\n        id\n        authorUsername\n        authorId\n        authorLevel\n        body\n        isNewUser\n        status\n        deleteReason\n        seqId\n        date\n    }\n    pageInfo {\n        hasNextPage\n    }\n }\n  \n  }",
+        "variables": {
+            "postId": 109666696,
+            "page": 1,
+            "token": ""
+        }
+    },
+    "postContact": {
+        "query": "query postContact($postId: Int!, $isManualRequest: Boolean) {\n    \n  postContact(postId: $postId, isManualRequest: $isManualRequest)\n  { \n    contactText\n    contactMobile\n }\n  \n  }",
+        "variables": {
+            "postId": 109666696,
+            "isManualRequest": true
+        }
+    },
+    "similarPosts": {
+        "query": "query similarPosts($id: Int!) {\n    \n  similarPosts(id: $id)\n  { \n    id\n    groupTags {\n      tag\n      city\n      posts {\n        items {\n          id\n          status\n          authorUsername\n          title\n          city\n          postDate\n          updateDate\n          hasImage\n          thumbURL\n          imagesList\n          bodyHTML\n          bodyTEXT\n          authorId\n          tags\n          upRank\n          downRank\n          city\n          geoCity\n          geoNeighborhood\n          geoHash\n          commentEnabled\n          commentStatus\n        }\n      }\n    }\n }\n  \n  }",
+        "variables": {
+            "id": 109666665
+        }
+    }
+    
+}

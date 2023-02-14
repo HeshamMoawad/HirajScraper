@@ -19,10 +19,39 @@ import typing , time , sqlite3 , datetime , os
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from styles import Styles
+
+####################################################
+
+# MIT License
+
+# Copyright (c) 2023 HeshamMoawad
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# Contact Me 
+# GitHub : github.com/HeshamMoawad
+# Gmail : HeshamMoawad120120@gmail.com
+# Whatsapp : +201111141853
 
 
-
-
+####################################################
 
 class MyQTreeWidget(QTreeWidget,QWidget):
     onLengthChanged = pyqtSignal(int)
@@ -32,6 +61,7 @@ class MyQTreeWidget(QTreeWidget,QWidget):
     def __init__(self, parent: typing.Optional[QWidget],counterLabel:typing.Optional[QLabel]) -> None:
         super().__init__(parent)
         self.counterLabel = counterLabel
+        self.ColumnNames = []
         if counterLabel != None : 
             self.onLengthChanged.connect(self.CounterLabel)
         
@@ -49,6 +79,14 @@ class MyQTreeWidget(QTreeWidget,QWidget):
             self.df[self.COLUMN_NAMES[col_index]] = col_vals
         return self.df
 
+    def getCustomDataFrame(self,values:dict)-> pandas.DataFrame:
+        re = []
+        df = self.extract_data_to_DataFrame()
+        for key , value in values.items():
+            if value != None :
+                re.append(key)
+        return df[re] 
+
     def extract_data_to_list(self,index_of_column)->list:
         return self.extract_data_to_DataFrame()[self.COLUMN_NAMES[index_of_column]].to_list()
     
@@ -58,7 +96,8 @@ class MyQTreeWidget(QTreeWidget,QWidget):
     def extract_columns(self,lista)->str:
         return self.extract_data_to_DataFrame()[[self.COLUMN_NAMES[i] for i in lista]].to_string(index=False)
 
-    def appendData(self,items:typing.Optional[list],childs:typing.Optional[list]=None,Icon:str=None)-> None:
+    def appendDataAsList(self,items:typing.Optional[list],childs:typing.Optional[list]=None,Icon:str=None)-> None:
+        print(len(items))        
         item_ = QTreeWidgetItem(self)
         item_.setIcon(0,QIcon(Icon)) if Icon != None else None
         for i in range(self.columnCount()):
@@ -81,11 +120,20 @@ class MyQTreeWidget(QTreeWidget,QWidget):
                     item.child(childindex).setText(i, childs[i])
                 self._CHILD_COUNT+=1
                 self.childChanged.emit(item.childCount())
-
         self._ROW_INDEX += 1
         self.onLengthChanged.emit(self._ROW_INDEX)
         
-    
+
+    #################
+    def appendDataAsDict(self,items:typing.Optional[dict],Icon:str=None)-> None:
+        print(items)
+        item_ = QTreeWidgetItem(self)
+        item_.setIcon(0,QIcon(Icon)) if Icon != None else None
+        for column in self.ColumnNames:
+            self.topLevelItem(self._ROW_INDEX).setText(self.ColumnNames.index(column),str(items[column]))
+        self._ROW_INDEX += 1
+        self.onLengthChanged.emit(self._ROW_INDEX)
+
     
     @pyqtProperty(int)
     def length(self):
@@ -95,9 +143,9 @@ class MyQTreeWidget(QTreeWidget,QWidget):
     def CounterLabel(self):
         self.counterLabel.setText(f"Count : {self._ROW_INDEX}")
         
-    
     def setColumns(self, columns: list) -> None:
         for column in columns:
+            self.ColumnNames.append(column)
             self.headerItem().setText(columns.index(column),str(column))
 
     def takeTopLevelItem(self, index: int) -> QTreeWidgetItem:
@@ -550,6 +598,7 @@ class MyQMainWindow(QMainWindow):
     Entered = pyqtSignal()
     ShowSignal = pyqtSignal()
     MessageBox = MyMessageBox()
+    msg = MyMessageBox()
     
     
     def __init__(self) -> None:
@@ -644,7 +693,6 @@ class DataBase():
         Check if this Value is exist or not \n
         1- If value is exist that will return -> True \n
         2- If value is not exist that will return -> False
-
         """
         self.cur.execute(f"""SELECT * FROM data WHERE {column} = '{val}'; """)
         return True if self.cur.fetchall() != [] else False
@@ -851,6 +899,7 @@ class QSideMenuEnteredLeaved(QWidget):
     def __init__(
             self,
             parent:QWidget,
+            Title:str = "" ,
             ButtonsCount:int = 2,
             PagesCount:int = 2 ,
             ToggleCount:int = 2 ,
@@ -882,7 +931,8 @@ class QSideMenuEnteredLeaved(QWidget):
         self.TopFrame.setFixedHeight(TopFrameFixedHight) if TopFrameFixedHight != None else None
         self.horizontalLayout_2 = QHBoxLayout(self.TopFrame)
         self.MainLabel = QLabel(self.TopFrame)
-        self.MainLabel.setText("Statues")
+        self.MainLabel.setText(Title)
+        # self.MainLabel.setStyleSheet(Styles.Label.Normal)
         self.horizontalLayout_2.addWidget(self.MainLabel, 4 ,Qt.AlignmentFlag.AlignCenter|Qt.AlignmentFlag.AlignCenter)
         self.MiniButton = QPushButton(self.TopFrame)
         self.MiniButton.setFlat(True)
@@ -915,10 +965,14 @@ class QSideMenuEnteredLeaved(QWidget):
         self.verticalLayout_2 = QVBoxLayout(self.ButtonsFrame)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setSpacing(ButtonsSpacing)
+        self.ExitButton.setStyleSheet(Styles.PushButton.Normal)
+        self.MaxButton.setStyleSheet(Styles.PushButton.Normal)
+        self.MiniButton.setStyleSheet(Styles.PushButton.Normal)
         for index in range(ButtonsCount) :
             Button = MyQToolButton(self.ButtonsFrame)
             Button.setTexts(f'{index}',f"Button {index}") 
             Button.setAutoRaise(True)
+            Button.setStyleSheet(Styles.PushButton.Normal)
             #Button.setCheckable(True)
             sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
             sizePolicy.setHeightForWidth(Button.sizePolicy().hasHeightForWidth())
@@ -1042,21 +1096,21 @@ class QSideMenuEnteredLeaved(QWidget):
 
 ## ------------- Custom Thread class
 class MyThread(QThread):
+
     statues = pyqtSignal(str)
+    msg = pyqtSignal(str)
 
     def __init__(self) -> None:
         super().__init__()
-        self.msg = MyMessageBox()
-    def setMainClass(self,mainClass:BaseScrapingClassQt5):
-        self.mainClass = mainClass
-
-    def kill(self,msg:typing.Optional[bool]):
+        
+    def kill(self,msg:str=None):
         """Method to kill Thread when it Running"""
         if self.isRunning():
             self.terminate()
             self.wait()
-            if msg:
-                self.msg.showInfo(text="سيبونا ناخد فرصتنا بقى")
+        if msg != None :
+            self.msg.emit(msg)
+        self.statues.emit("Stopped")
 
     def start(self, priority: 'QThread.Priority' = ...) -> None:
         """Method to start Thread when it NotRunning"""

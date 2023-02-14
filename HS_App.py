@@ -6,7 +6,7 @@ from MyPyQt5 import (MyQMainWindow,
                     QSize,
                     QShortcut,
                     QKeySequence ,
-                    pyqtSignal
+                    pyqtSignal ,
                     )
 
 from pages import Page1 , Page2
@@ -39,19 +39,12 @@ class Window(MyQMainWindow):
         self.dashboard.setIcon(QIcon("Data\Icons\dashboard.png"))
         self.dashboard.setIconSize(QSize(30,30))
         self.dashboard.setTexts("","  Dash Board")
-        self.Menu.connect_Button_Page(
-            btn= self.dashboard,
-            pageIndex = 0 ,
-        )
+        self.Menu.connect_Button_Page(btn = self.dashboard,pageIndex = 0 ,)
         self.exports = self.Menu.getButton(1)
         self.exports.setIcon(QIcon("Data\Icons\icons8-export-excel-96.png"))
         self.exports.setIconSize(QSize(35,35))
         self.exports.setTexts("","  Exports")
-        self.Menu.connect_Button_Page(
-            btn = self.exports,
-            pageIndex = 1 ,
-        )
-
+        self.Menu.connect_Button_Page(btn = self.exports,pageIndex = 1 ,)
         self.startShort = QShortcut(QKeySequence("enter"),self)
         self.startShort.activated.connect(self.op)
         

@@ -143,3 +143,4 @@ class Hiraj(BaseScrapingClassQt5,DataBase):
         
 
 
+
