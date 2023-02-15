@@ -1136,7 +1136,7 @@ class DateOperations(object):
         epoch_time = round(stamp,ndigits=0)
         return datetime.datetime.fromtimestamp( epoch_time )
 
-    def currentDate(self,flag:TimeFlags):
+    def getCurrentDate(self,flag:TimeFlags = TimeFlags.DateWithTime):
         """Flag That Mean Type Of Returned Value
         \nExample:
             date = DateOperations()\n

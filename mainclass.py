@@ -6,13 +6,24 @@ from MyPyQt5 import  (
     DataBase , 
     QObject,
     pyqtSignal ,
-
+    DateOperations
     )
 
 
 class Hiraj(QObject):
+    LeadsSignal = pyqtSignal(dict)
+    AdIDSignal = pyqtSignal(int)
+    UserIDSignal = pyqtSignal(int)
+
+    class DataTableFlags():
+        AdsData = 'AdsData'
+        CommentsData = 'CommentsData'
+        ContactsData = 'ContactsData'
+        ProfilesData = 'ProfilesData'
+        UsersData = 'UsersData'
+
     class URLs():
-        First = 'https://graphql.haraj.com.sa/?queryName&clientId&version/' # ALL
+        First = 'https://graphql.haraj.com.sa/' # ALL
         Secound = 'https://matjar.haraj.com.sa/graphql'  # Profile 
 
     class PayloadQueryFlags():
@@ -111,9 +122,6 @@ class Hiraj(QObject):
             tag = 'tag'
             PostID = 'id' # List
 
-
-
-
     class ResponseKeys():
         class AdInfo():
             id = 'id' # Int
@@ -180,76 +188,116 @@ class Hiraj(QObject):
 
     def __init__(self) -> None:
         self.Data = DataBase('Data\DataBase.db')
+        self.Date = DateOperations() 
+        self.AdID = 0
+        self.AdCreatorID = 0
+        self.AdCreatorUsername = ''
+
         super().__init__()
+
+    def setCreator(self,AdID:int,AdCreatorID:int,AdCreatorUsername:str):
+        self.AdID = AdID
+        self.AdCreatorID = AdCreatorID
+        self.AdCreatorUsername = AdCreatorUsername
+
+
+    def addToDataBase(self,table:DataTableFlags,response:dict):
+        response['AdID'] = self.AdID
+        response['AdCreatorID'] = self.AdCreatorID
+        response['AdCreatorUsername'] = self.AdCreatorUsername
+        response['DateScraping'] = self.Date.getCurrentDate()
+        self.Data.add_to_db(
+            table = table,
+            **response
+        )
+        
         
 
-    def resolveSearchResponse(self,response) -> list: #  Done 
+    def resolveSearchResponse(self,response) -> list: #  Done #####
         resultIDs = []
         for Ad in response["data"]["search"]["items"] :
-            id = Ad['id']
+            id = Ad[self.ResponseKeys.Search.id]
             if not self.Data.exist(table = "AdsData" ,column='id' ,val = id ):
-                Ad['similarPosts'] = False
+                Ad['MethodType'] = 'Search'
                 Ad['similarPostID'] = 0
-                self.Data.add_to_db(
-                    table = 'AdsData' ,
-                    **Ad
+                self.addToDataBase(
+                    table = self.DataTableFlags.AdsData ,
+                    response = Ad
                     )
+                self.AdIDSignal.emit(int(id))
                 resultIDs.append(id)
+
         return resultIDs
 
 
-
-    def resolveCommentsResponse(self,AdID:int,AdCreatorID:int,AdCreatorUsername:str,response)-> list: # Done
+    def resolveCommentsResponse(self,response)-> list: # Done  #######
         commenterIDs = []
         for comment in response["data"]['comments']['items'] :
             id = comment['id']
             if not self.Data.exist(table = "CommentsData" ,column='id' ,val = id ):
-                comment['AdID'] = AdID
-                comment['AdCreatorID'] = AdCreatorID
-                comment['AdCreatorUsername'] = AdCreatorUsername
-                self.Data.add_to_db(
-                    table ='CommentsData',
-                    **comment
-                    )
+                self.addToDataBase(
+                    table = self.DataTableFlags.CommentsData ,
+                    response = comment
+                )
+                self.UserIDSignal.emit(int(comment['authorId']))
                 commenterIDs.append(comment['authorId'])
         return commenterIDs
 
-        
 
-    def resolvePostContactResponse(self):
+    def resolvePostContactResponse(self,response)-> str: # Done #####
+        response = response['data']['postContact']
+        self.addToDataBase(
+            table = self.DataTableFlags.ContactsData ,
+            response = response
+        )
+        self.LeadsSignal.emit({'UserName':self.AdCreatorUsername ,'PhoneNumber':response[self.ResponseKeys.postContact.contactMobile]})
+        return response[self.ResponseKeys.postContact.contactMobile]
+
         
-        pass
+        
 
     def resolveSimilarPostsResponse(self,response): # Done
         resultIDs = []
         similarPostID = response["data"]['similarPosts']['id']
         for Ad in response["data"]['similarPosts']['groupTags'][0]['posts']['items'] :
             id = Ad['id']
-            if not self.Data.exist(table = "AdsData" ,column='id' ,val = id ):
-                Ad['similarPosts'] = True
+            if not self.Data.exist(table = self.DataTableFlags.AdsData ,column= 'AdID' ,val = id ):
+                Ad['MethodType'] = 'SimilarPosts'
                 Ad['similarPostID'] = similarPostID
-                self.Data.add_to_db(
-                    table = 'AdsData' ,
-                    **Ad
-                    )
+                self.addToDataBase(
+                    table = self.DataTableFlags.AdsData ,
+                    response = Ad
+                )
+                self.AdIDSignal.emit(int(id))
                 resultIDs.append(id)
         return resultIDs
         
 
+
         
-    def resolveFetchAdsResponse(self):
-        pass
+    def resolveFetchAdsResponse(self,response):
+        resultIDs = []
+        
+        for Ad in response['data']['posts']['items'] :
+            id = Ad['id']
+            if not self.Data.exist(table=self.DataTableFlags.AdsData , column = 'AdID',val = id) :
+                Ad['MethodType'] = 'FetchAds'
+                Ad['similarPostID'] = 0
+                self.addToDataBase(
+                    table = self.DataTableFlags.AdsData,
+                    response = Ad
+                )
+                resultIDs.append(id)
+        return resultIDs
 
 
-    # def getQuery(self):
-    #     queryfile = open('Payloads\Payload.json','r')
-    #     jsonQuery = json.load(queryfile)
+    def resolveProfileResponse(self,response):
+        response = response['data']['profile']
+        response['contacts'] = [f"{x['info']}\n" for x in response['contacts'] ]
+        self.addToDataBase(
+            table = self.DataTableFlags.ProfilesData ,
+            response = response
+        )
+        
 
-    #     print('\n\n')
-    #     print(jsonQuery['Search'])
 
-
-
-# h = Hiraj()
-# h.resolveSearchResponse()
-# h.getQuery()
