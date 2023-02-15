@@ -286,30 +286,32 @@ class Hiraj(QObject):
             url = url ,
             headers = self.header ,
             json = Payload ,
-            proxies = self.ProxyAPI.getRandomProxyWithTimeOut(30) ,
+            proxies = self.ProxyAPI.getRandomProxyWithTimeOut(30) if self.ProxyFlag == self.ProxyAPI.ProxyFlags.RandomProxy else None ,
         )
         return  response.json()
 
 
     def Search(self,**kwargs):
-        IDs = []
-        while 1:
-            
-            Response = self.sendRequest(self.PayloadQueryTypeFlags.Search,**kwargs)
-            solvedResponse = self.resolveSearchResponse(Response)
-            if solvedResponse['HasNextPage'] == True :
-                kwargs['variables'][self.RequestKeys.Search.page]  += 1
-                Response = self.sendRequest(
-                    RequestType = self.PayloadQueryTypeFlags.Search,
-                    **kwargs
-                    )
+        Response = self.sendRequest(self.PayloadQueryTypeFlags.Search,**kwargs)
+        return self.resolveSearchResponse(Response)
+         
+    def FetchAds(self,**kwargs):
+        Response = self.sendRequest(self.PayloadQueryTypeFlags.FetchAds,**kwargs)
+        return self.resolveSearchResponse(Response)
 
-                solvedResponse = self.resolveSearchResponse(Response)
-            if solvedResponse['HasNextPage'] == False :
-                break
-
-        
-
+    def Profile(self,UserID:int):
+        Response = self.sendRequest(
+            self.PayloadQueryTypeFlags.Profile,
+            **{self.RequestKeys.Profile.id : UserID} ,
+            )
+        self.resolveProfileResponse(Response)
+    
+    def Comments(self,PostID:int):
+        Response = self.sendRequest(
+            self.PayloadQueryTypeFlags.Comments,
+            **{self.RequestKeys.Comments.postId : PostID}
+        )
+        return self.resolveCommentsResponse(Response)
 
 
 
