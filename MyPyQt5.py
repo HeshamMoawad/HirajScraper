@@ -1120,3 +1120,34 @@ class MyThread(QThread):
             return super().start(priority)
 
 ###################################################
+class DateOperations(object):
+        
+
+    class TimeFlags():
+        Epoch = 'stamp'
+        DateWithTime = 'DateWithTime'
+        DateOnly = 'DateOnly'
+        TimeOnly = 'TimeOnly'
+
+    def __init__(self) -> None:
+        pass
+
+    def translateTimeFromStampToDate(self,stamp:float) -> datetime.datetime :
+        epoch_time = round(stamp,ndigits=0)
+        return datetime.datetime.fromtimestamp( epoch_time )
+
+    def currentDate(self,flag:TimeFlags):
+        """Flag That Mean Type Of Returned Value
+        \nExample:
+            date = DateOperations()\n
+            date.currentDate(date.TimeFlags.DateWithTime)\n
+            'That Will Return current Date and Time '......
+        """
+        if flag == self.TimeFlags.Epoch:
+            return time.time()
+        elif flag == self.TimeFlags.DateWithTime :
+            return self.translateTimeFromStampToDate(time.time())
+        elif flag == self.TimeFlags.DateOnly :
+            return self.translateTimeFromStampToDate(time.time()).date()
+        elif flag == self.TimeFlags.TimeOnly:
+            return self.translateTimeFromStampToDate(time.time()).time()

@@ -1,0 +1,3 @@
+https://graphql.haraj.com.sa/?queryName&clientId&version/       # Search
+
+https://matjar.haraj.com.sa/graphql     # Profile
