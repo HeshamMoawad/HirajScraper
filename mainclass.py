@@ -1,13 +1,14 @@
 from time import  sleep
 from datetime import datetime
 import json , requests , json
+from ProxyFilterClass import ProxyFilterAPI
 from MyPyQt5 import  (
     Validation , 
     DataBase , 
     QObject,
     pyqtSignal ,
     DateOperations ,
-    MyMessageBox
+    MyMessageBox 
     )
 
 
@@ -43,7 +44,8 @@ class Hiraj(QObject):
             tag = 'tag' # Str
             cities = 'cities' # List
             search = 'search' # Keyword
-        
+            page = 'page' # Page
+
         class Profile():
             id = 'id'
         
@@ -66,6 +68,7 @@ class Hiraj(QObject):
             authorUsername = 'authorUsername'
             tag = 'tag'
             PostID = 'id' # List
+            page = 'page' 
 
     class ResponseKeys():
         class AdInfo():
@@ -131,7 +134,12 @@ class Hiraj(QObject):
             countFollowers= "countFollowers"
 
 
-    def __init__(self) -> None:
+    def __init__(
+        self ,
+        Proxy:ProxyFilterAPI.ProxyFlags=ProxyFilterAPI.ProxyFlags.NoProxy ,
+
+        ) -> None:
+
         self.Data = DataBase('Data\DataBase.db')
         self.Date = DateOperations() 
         self.AdID = 0
@@ -147,6 +155,8 @@ class Hiraj(QObject):
             'referer' : 'https://haraj.com.sa/',
         }
         self.Payloads = json.load(open('Payloads\Payload.json','r'))
+        self.ProxyAPI = ProxyFilterAPI()
+        self.ProxyFlag = Proxy
         super().__init__()
 
     def setCreator(self,AdID:int,AdCreatorID:int,AdCreatorUsername:str):
@@ -170,7 +180,7 @@ class Hiraj(QObject):
         
         
 
-    def resolveSearchResponse(self,response) -> list: #  Done #####
+    def resolveSearchResponse(self,response:dict) -> dict: #  Done #####
         resultIDs = []
         for Ad in response["data"]["search"]["items"] :
             id = Ad[self.ResponseKeys.Search.id]
@@ -183,11 +193,12 @@ class Hiraj(QObject):
                     )
                 self.AdIDSignal.emit(int(id))
                 resultIDs.append(id)
-        return resultIDs
+        HasNextPage = response["data"]["search"]["pageInfo"]['hasNextPage']
+        return {"Result": resultIDs ,"HasNextPage":HasNextPage}
 
 
 
-    def resolveCommentsResponse(self,response)-> list: # Done  #######
+    def resolveCommentsResponse(self,response:dict)-> dict: # Done  #######
         commenterIDs = []
         for comment in response["data"]['comments']['items'] :
             id = comment['id']
@@ -198,11 +209,11 @@ class Hiraj(QObject):
                 )
                 self.UserIDSignal.emit(int(comment['authorId']))
                 commenterIDs.append(comment['authorId'])
-        return commenterIDs
+        HasNextPage = response["data"]['comments']['pageInfo']['hasNextPage']
+        return {"Result": commenterIDs ,"HasNextPage":HasNextPage}
 
 
-
-    def resolvePostContactResponse(self,response)-> str: # Done #####
+    def resolvePostContactResponse(self,response:dict)-> str: # Done #####
         response = response['data']['postContact']
         self.addToDataBase(
             table = self.DataTableFlags.ContactsData ,
@@ -214,7 +225,7 @@ class Hiraj(QObject):
         
         
 
-    def resolveSimilarPostsResponse(self,response): # Done
+    def resolveSimilarPostsResponse(self,response:dict)-> list : # Done
         resultIDs = []
         similarPostID = response["data"]['similarPosts']['id']
         for Ad in response["data"]['similarPosts']['groupTags'][0]['posts']['items'] :
@@ -233,7 +244,7 @@ class Hiraj(QObject):
 
 
         
-    def resolveFetchAdsResponse(self,response):
+    def resolveFetchAdsResponse(self,response:dict)->dict:
         resultIDs = []
         
         for Ad in response['data']['posts']['items'] :
@@ -250,7 +261,7 @@ class Hiraj(QObject):
         return resultIDs
 
 
-    def resolveProfileResponse(self,response):
+    def resolveProfileResponse(self,response:dict):
         response = response['data']['profile']
         response['contacts'] = "".join([f"{x['info']}\n" for x in response['contacts']])
         self.addToDataBase(
@@ -260,18 +271,44 @@ class Hiraj(QObject):
         
 
 
-    def sendRequest(self,RequestType:PayloadQueryTypeFlags) -> dict:
+    def sendRequest(
+        self,
+        RequestType:PayloadQueryTypeFlags,
+        Proxy:ProxyFilterAPI.ProxyFlags = ProxyFilterAPI.ProxyFlags.NoProxy,
+        **kwargs
+        ) -> dict:
+
         url = self.URLs.Secound if RequestType == self.PayloadQueryTypeFlags.Profile else self.URLs.First
+        Payload = self.Payloads[RequestType]
+        for key,value in kwargs.items():
+            Payload['variables'][key] = value
         response = requests.post(
             url = url ,
             headers = self.header ,
-            json = self.Payloads[RequestType]
+            json = Payload ,
+            proxies = self.ProxyAPI.getRandomProxyWithTimeOut(30) ,
         )
-        print(type(response.json()))
-        return response.json()
+        return  response.json()
 
-    def go(self):
-        pass
+
+    def Search(self,**kwargs):
+        IDs = []
+        while 1:
+            
+            Response = self.sendRequest(self.PayloadQueryTypeFlags.Search,**kwargs)
+            solvedResponse = self.resolveSearchResponse(Response)
+            if solvedResponse['HasNextPage'] == True :
+                kwargs['variables'][self.RequestKeys.Search.page]  += 1
+                Response = self.sendRequest(
+                    RequestType = self.PayloadQueryTypeFlags.Search,
+                    **kwargs
+                    )
+
+                solvedResponse = self.resolveSearchResponse(Response)
+            if solvedResponse['HasNextPage'] == False :
+                break
+
+        
 
 
 

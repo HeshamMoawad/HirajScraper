@@ -12,13 +12,13 @@
 # print("Converted Datetime:", date_time )  
 # print("Converted Datetime:", type(date_time) )  
 
-from MyPyQt5 import DateOperations
+# from MyPyQt5 import DateOperations
 
 
-d = DateOperations()
+# d = DateOperations()
 
-print(d.currentDate(d.TimeFlags.DateOnly))
-
+# print(d.currentDate(d.TimeFlags.DateOnly))
+print(0-0)
 
 
 # def translateTimeFromStampToDate(stamp):

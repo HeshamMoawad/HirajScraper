@@ -5,7 +5,7 @@
             "isRe": true,
             "city": null,
             "authorUsername": null,
-            "page": null,
+            "page": 1,
             "limi": null,
             "tag": null,
             "id": [],
@@ -40,7 +40,7 @@
             "correctedWords": [],
             "search": "ملابس",
             "orderByPostId": false,
-            "page": 2,
+            "page": 1,
             "cities": [
                 "الرياض"
             ]
