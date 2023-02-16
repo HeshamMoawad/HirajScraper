@@ -687,6 +687,8 @@ class DataBase():
         self.con = sqlite3.connect(relativepath)
         self.cur = self.con.cursor()
 
+    def columns(self,table)->list:
+        return [x[0] for x in self.cur.execute(f"SELECT * FROM {table}").description ]
 
     def exist(self,table,column,val):
         """
@@ -698,7 +700,28 @@ class DataBase():
         return True if self.cur.fetchall() != [] else False
     
     
-    def add_to_db(self,table:str,**kwargs):
+    # def add_to_db(self,table:str,**kwargs):
+    #     """
+    #     Adding values to Database :-\n
+    #     example : \n
+    #     'if you want to add number to (PhoneNumber)column in (userdata) table in DB'\n
+    #     add_to_db(\n
+    #         table = userdata ,\n
+    #         PhoneNumber = value , # number that you want to add
+    #     )
+    #     """
+    #     try:
+            
+    #         self.cur.execute(f"""
+    #         INSERT INTO {table} {str(tuple(kwargs.keys())).replace("'","")}
+    #         VALUES {tuple(kwargs.values())} ; 
+    #         """)
+    #         self.con.commit()
+    #     except Exception as e:
+    #         print(f"\n{e} \nError in Database \n")
+
+
+    def addToDataAsDict(self,table:str,**kwargs):
         """
         Adding values to Database :-\n
         example : \n
@@ -709,13 +732,24 @@ class DataBase():
         )
         """
         try:
+            columns = self.columns(table)
+            t = f"""
+            \n
+            COLUMNS = {columns}
+            INSERT INTO {table} {str(tuple(columns)).replace("'","")}
+            VALUES {tuple([(kwargs[column] if kwargs[column] != None else 'NULL') for column in columns ])} ; 
+            """
             self.cur.execute(f"""
-            INSERT INTO {table} {str(tuple(kwargs.keys())).replace("'","")}
-            VALUES {tuple(kwargs.values())}; 
+            INSERT INTO {table} {str(tuple(columns)).replace("'","")}
+            VALUES {tuple([(kwargs[column] if kwargs[column] != None else 'NULL') for column in columns ])} ; 
             """)
             self.con.commit()
+            print(t)
         except Exception as e:
             print(f"\n{e} \nError in Database \n")
+            print(t)
+            print("\n")
+
 
     def close(self):
         """Closing DataBase"""
@@ -1146,8 +1180,8 @@ class DateOperations(object):
         if flag == self.TimeFlags.Epoch:
             return time.time()
         elif flag == self.TimeFlags.DateWithTime :
-            return self.translateTimeFromStampToDate(time.time())
+            return str(self.translateTimeFromStampToDate(time.time()))
         elif flag == self.TimeFlags.DateOnly :
-            return self.translateTimeFromStampToDate(time.time()).date()
+            return str(self.translateTimeFromStampToDate(time.time()).date())
         elif flag == self.TimeFlags.TimeOnly:
-            return self.translateTimeFromStampToDate(time.time()).time()
+            return str(self.translateTimeFromStampToDate(time.time()).time())
