@@ -1,19 +1,17 @@
 from time import  sleep
-from datetime import datetime
-import json , requests , json
+import json , requests , json , threading
 from ProxyFilterClass import ProxyFilterAPI
 from MyPyQt5 import  (
-    Validation , 
     DataBase , 
     QObject,
     pyqtSignal ,
     DateOperations ,
-    MyMessageBox 
+     
     )
 
 
-class Hiraj(QObject):
-    msg = MyMessageBox()
+class HirajBase(QObject):
+    msg = pyqtSignal(str)
     LeadsSignal = pyqtSignal(dict)
     AdIDSignal = pyqtSignal(int)
     UserIDSignal = pyqtSignal(int)
@@ -159,6 +157,7 @@ class Hiraj(QObject):
         self.ProxyFlag = Proxy
         super().__init__()
 
+
     def setCreator(self,AdID:int,AdCreatorID:int,AdCreatorUsername:str):
         self.AdID = AdID
         self.AdCreatorID = AdCreatorID
@@ -173,18 +172,17 @@ class Hiraj(QObject):
         if table == self.DataTableFlags.AdsData:
             response[self.ResponseKeys.AdInfo.imagesList] = "".join([f"{x}\n" for x in response[self.ResponseKeys.AdInfo.imagesList] ])
             response[self.ResponseKeys.AdInfo.tags] = "".join([f"{x}\n" for x in response[self.ResponseKeys.AdInfo.tags] ])
-        self.Data.add_to_db(
+        self.Data.addToDataAsDict(
             table = table,
             **response
         )
-        
         
 
     def resolveSearchResponse(self,response:dict) -> dict: #  Done #####
         resultIDs = []
         for Ad in response["data"]["search"]["items"] :
             id = Ad[self.ResponseKeys.Search.id]
-            if not self.Data.exist(table = "AdsData" ,column='id' ,val = id ):
+            if not self.Data.exist(table = self.DataTableFlags.AdsData ,column = 'AdID'  ,val = id ):
                 Ad['MethodType'] = 'Search'
                 Ad['similarPostID'] = 0
                 self.addToDataBase(
@@ -192,10 +190,9 @@ class Hiraj(QObject):
                     response = Ad
                     )
                 self.AdIDSignal.emit(int(id))
-                resultIDs.append(id)
+                resultIDs.append(Ad)
         HasNextPage = response["data"]["search"]["pageInfo"]['hasNextPage']
         return {"Result": resultIDs ,"HasNextPage":HasNextPage}
-
 
 
     def resolveCommentsResponse(self,response:dict)-> dict: # Done  #######
@@ -223,8 +220,6 @@ class Hiraj(QObject):
         return response[self.ResponseKeys.postContact.contactMobile]
 
         
-        
-
     def resolveSimilarPostsResponse(self,response:dict)-> list : # Done
         resultIDs = []
         similarPostID = response["data"]['similarPosts']['id']
@@ -241,12 +236,9 @@ class Hiraj(QObject):
                 resultIDs.append(id)
         return resultIDs
         
-
-
         
     def resolveFetchAdsResponse(self,response:dict)->dict:
         resultIDs = []
-        
         for Ad in response['data']['posts']['items'] :
             id = Ad['id']
             if not self.Data.exist(table=self.DataTableFlags.AdsData , column = 'AdID',val = id) :
@@ -258,11 +250,13 @@ class Hiraj(QObject):
                     response = Ad
                 )
                 resultIDs.append(id)
-        return resultIDs
+        HasNextPage = response['data']['posts']['pageInfo']['hasNextPage']
+        return {"Result": resultIDs ,"HasNextPage":HasNextPage}
 
 
     def resolveProfileResponse(self,response:dict):
         response = response['data']['profile']
+        print(response)
         response['contacts'] = "".join([f"{x['info']}\n" for x in response['contacts']])
         self.addToDataBase(
             table = self.DataTableFlags.ProfilesData ,
@@ -270,11 +264,19 @@ class Hiraj(QObject):
         )
         
 
+    def resolveUserResponse(self,response:dict)-> int:
+        response = response['data']['user']
+        self.addToDataBase(
+            table = self.DataTableFlags.UsersData ,
+            response = response
+        )
+        return response['lastSeen']
+
+
 
     def sendRequest(
         self,
         RequestType:PayloadQueryTypeFlags,
-        Proxy:ProxyFilterAPI.ProxyFlags = ProxyFilterAPI.ProxyFlags.NoProxy,
         **kwargs
         ) -> dict:
 
@@ -282,14 +284,16 @@ class Hiraj(QObject):
         Payload = self.Payloads[RequestType]
         for key,value in kwargs.items():
             Payload['variables'][key] = value
-        response = requests.post(
+
+        pro = self.ProxyAPI.getRandomProxyWithTimeOut(10) if self.ProxyFlag == self.ProxyAPI.ProxyFlags.RandomProxy else {}
+        session = requests.Session()
+        session.proxies = pro
+        response = session.post(
             url = url ,
             headers = self.header ,
             json = Payload ,
-            proxies = self.ProxyAPI.getRandomProxyWithTimeOut(30) if self.ProxyFlag == self.ProxyAPI.ProxyFlags.RandomProxy else None ,
         )
         return  response.json()
-
 
     def Search(self,**kwargs):
         Response = self.sendRequest(self.PayloadQueryTypeFlags.Search,**kwargs)
@@ -313,12 +317,86 @@ class Hiraj(QObject):
         )
         return self.resolveCommentsResponse(Response)
 
+    def PostContact(self,PostID:int):
+        Response = self.sendRequest(
+            RequestType = self.PayloadQueryTypeFlags.PostContact ,
+            **{self.RequestKeys.postContact.postId:PostID}
+        )
+        return self.resolvePostContactResponse(Response)
+
+    def SimilarPosts(self,PostIDSimilar:int):
+        Response = self.sendRequest(
+            RequestType=self.PayloadQueryTypeFlags.SimilarPosts,
+            **{self.RequestKeys.SimilarPosts.id:PostIDSimilar}
+            )
+        return self.resolveSimilarPostsResponse(Response)
+
+    def User(self,UserName:str): 
+        Response = self.sendRequest(
+            RequestType = self.PayloadQueryTypeFlags.User ,
+            **{self.RequestKeys.User.Username:UserName}
+        )
+        return self.resolveUserResponse(Response)
 
 
 
+class HirajSlots(QObject):
+    class FastLevelFlags():
+        Normal = 'Normal'
+        High = 'High'
+        SuperFast = 'SuperFast'
+        All = [Normal,High,SuperFast]
 
-h= Hiraj()
-print(h.sendRequest(h.PayloadQueryTypeFlags.FetchAds))
+
+    LeadSignal = pyqtSignal(dict)
+    msg = pyqtSignal(str)
+    def __init__(
+        self ,
+        Proxy:ProxyFilterAPI.ProxyFlags = ProxyFilterAPI.ProxyFlags.NoProxy ,
+        FastLevel:FastLevelFlags = FastLevelFlags.Normal
+        ) -> None:
+        self.HirajBase = HirajBase(Proxy)
+        super().__init__()
+        self.HirajBase.msg.connect(self.msg.emit)
+        self.FastLevel = FastLevel
+        
+
+    def Search(self,**kwargs):
+        AdsData = self.HirajBase.Search(**kwargs)
+        for Ad in AdsData['Result']:
+            Lead = {}
+            self.HirajBase.setCreator(
+                AdID = Ad[HirajBase.ResponseKeys.Search.id] ,
+                AdCreatorID = Ad[HirajBase.ResponseKeys.Search.authorId] ,
+                AdCreatorUsername = Ad[HirajBase.ResponseKeys.Search.authorUsername]
+            )
+            self.HirajBase.Profile(Ad[HirajBase.ResponseKeys.Search.id])
+            Lead['UserName'] = Ad[HirajBase.ResponseKeys.Search.authorUsername]
+            Lead['PhoneNumber'] = self.HirajBase.PostContact(Ad[HirajBase.ResponseKeys.Search.id])
+            Lead['Title'] = Ad[HirajBase.ResponseKeys.Search.title]
+            Lead['LastSeen'] = str(self.HirajBase.Date.translateTimeFromStampToDate(
+                stamp = float(self.HirajBase.User(Ad[HirajBase.ResponseKeys.Search.authorUsername]))
+                ))
+            self.LeadSignal.emit(Lead)
+            print(Lead)
+    
+
+# h = HirajSlots(
+#     Proxy = ProxyFilterAPI.ProxyFlags.NoProxy,
+
+# )
+
+# h.Search(**{
+#         HirajBase.RequestKeys.Search.tag:"مستلزمات شخصية",
+#         HirajBase.RequestKeys.Search.cities:[
+#                 "الرياض"
+#             ],
+#         HirajBase.RequestKeys.Search.search:"ساعة"
+#     })
+
+
+h = HirajBase(Proxy=ProxyFilterAPI.ProxyFlags.RandomProxy)
+h.PostContact(110207944)
 
 
 
