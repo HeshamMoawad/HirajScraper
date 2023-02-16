@@ -23,7 +23,7 @@
     "postContact": {
         "query": "query postContact($postId: Int!, $isManualRequest: Boolean) {\n    \n  postContact(postId: $postId, isManualRequest: $isManualRequest)\n  { \n    contactText\n    contactMobile\n }\n  \n  }",
         "variables": {
-            "postId": 109666696,
+            "postId": 110203371,
             "isManualRequest": true
         }
     },
