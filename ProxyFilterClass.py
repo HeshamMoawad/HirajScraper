@@ -109,6 +109,7 @@ class ProxyFilterAPI(object): # From  https://free-proxy-list.net/
         self.end = time.time()
         if self.start == 0 or round(self.end - self.start,ndigits=0) >= timeout :
             self.autoAPI()
+            print(self.ProxiesList)
             return self.ProxiesList[random.randint(0,len(self.ProxiesList)-1)]
         else :
             return self.ProxiesList[random.randint(0,len(self.ProxiesList)-1)]
