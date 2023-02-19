@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtWidgets
-from MyPyQt5 import QObject , MyQTreeWidget , QIcon, QSize , MyCustomContextMenu,MyMessageBox
+from Packages import QObject , MyQTreeWidget , QIcon, QSize , MyCustomContextMenu,MyMessageBox
 import os , openpyxl,pandas,pyperclip,typing
 from datetime import datetime
 
