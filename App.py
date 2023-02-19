@@ -5,7 +5,7 @@ from Packages import (
     QSize
 )
 from mainclass import HirajSlots
-
+from pages import Page1 , Page2
 
 class Window(MyQMainWindow):
     def SetupUi(self):
@@ -33,9 +33,9 @@ class Window(MyQMainWindow):
         self.SettingBtn.setIcon(QIcon('Data\Icons\setting.png'))
         self.SettingBtn.setIconSize(QSize(30,30))
         self.SettingBtn.setTexts(entred=' Setting',leaved='')
-        # self.DashBoard = Page1(self.Menu.getPage(0))
-        # self.Setting = Page2(self.Menu.getPage(1))
-        # self.Setting.ExportRangeSignal.connect(self.DashBoard.setExportRange)
+        self.DashBoard = Page1(self.Menu.getPage(0))
+        self.Setting = Page2(self.Menu.getPage(1))
+        # self.Setting.ExportRangeSignal.connect(self.DashBoard.sektExportRange)
         self.Menu.connect_Button_Page(btn = self.DashBoardBtn ,pageIndex = 0)
         self.Menu.connect_Button_Page(btn = self.SettingBtn ,pageIndex = 1)
 
