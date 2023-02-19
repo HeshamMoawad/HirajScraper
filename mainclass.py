@@ -1,13 +1,17 @@
 from time import  sleep
-import json , requests , json , threading
+import json , requests , json  , random
 from ProxyFilterClass import ProxyFilterAPI
 from MyPyQt5 import  (
     DataBase , 
     QObject,
     pyqtSignal ,
     DateOperations ,
-     
+    Generator
     )
+
+
+
+
 
 
 class HirajBase(QObject):
@@ -15,6 +19,10 @@ class HirajBase(QObject):
     LeadsSignal = pyqtSignal(dict)
     AdIDSignal = pyqtSignal(int)
     UserIDSignal = pyqtSignal(int)
+
+    class Flags():
+        Random = 'Random'
+        Normal = 'Normal'
 
     class DataTableFlags():
         AdsData = 'AdsData'
@@ -151,11 +159,11 @@ class HirajBase(QObject):
             'accept-language' : 'en-US,en;q=0.9',
             'origin' : 'https://haraj.com.sa' ,
             'referer' : 'https://haraj.com.sa/',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36' # PostmanRuntime/7.31.0
         }
         self.Payloads = json.load(open('Payloads\Payload.json','r'))
-        self.ProxyAPI = ProxyFilterAPI()
-        self.ProxyFlag = Proxy
         super().__init__()
+        self.generator = Generator()
 
 
     def setCreator(self,AdID:int,AdCreatorID:int,AdCreatorUsername:str):
@@ -257,11 +265,12 @@ class HirajBase(QObject):
     def resolveProfileResponse(self,response:dict):
         response = response['data']['profile']
         print(response)
-        response['contacts'] = "".join([f"{x['info']}\n" for x in response['contacts']])
-        self.addToDataBase(
-            table = self.DataTableFlags.ProfilesData ,
-            response = response
-        )
+        if response != None:
+            response['contacts'] = "".join([f"{x['info']}\n" for x in response['contacts']])
+            self.addToDataBase(
+                table = self.DataTableFlags.ProfilesData ,
+                response = response
+            )
         
 
     def resolveUserResponse(self,response:dict)-> int:
@@ -272,11 +281,27 @@ class HirajBase(QObject):
         )
         return response['lastSeen']
 
+    def getHeaders(self,UserAgentType :Flags = Flags.Normal):
+        header = self.header
+        if UserAgentType == self.Flags.Random :
+            header['User-Agent'] = self.generator.getRandomUserAgent()
+        else :
+            header = self.header
+        return header
+
+    def getClientID(self,ClientIDType :Flags = Flags.Normal):
+        if ClientIDType == self.Flags.Random:
+            clientID = {'clientId': self.generator.generateClientID()}
+        else:
+            clientID = {}
+        return clientID
 
 
     def sendRequest(
         self,
         RequestType:PayloadQueryTypeFlags,
+        UserAgent:Flags = Flags.Normal,
+        ClientID :Flags = Flags.Normal ,
         **kwargs
         ) -> dict:
 
@@ -284,16 +309,14 @@ class HirajBase(QObject):
         Payload = self.Payloads[RequestType]
         for key,value in kwargs.items():
             Payload['variables'][key] = value
-
-        pro = self.ProxyAPI.getRandomProxyWithTimeOut(10) if self.ProxyFlag == self.ProxyAPI.ProxyFlags.RandomProxy else {}
-        session = requests.Session()
-        session.proxies = pro
-        response = session.post(
+        response = requests.post(
             url = url ,
-            headers = self.header ,
+            headers = self.getHeaders(UserAgent) ,
             json = Payload ,
+            params = self.getClientID(ClientID)
         )
         return  response.json()
+
 
     def Search(self,**kwargs):
         Response = self.sendRequest(self.PayloadQueryTypeFlags.Search,**kwargs)
@@ -320,8 +343,11 @@ class HirajBase(QObject):
     def PostContact(self,PostID:int):
         Response = self.sendRequest(
             RequestType = self.PayloadQueryTypeFlags.PostContact ,
+            UserAgent = self.Flags.Random ,
+            ClientID = self.Flags.Random ,
             **{self.RequestKeys.postContact.postId:PostID}
         )
+        # print(Response)
         return self.resolvePostContactResponse(Response)
 
     def SimilarPosts(self,PostIDSimilar:int):
@@ -370,7 +396,7 @@ class HirajSlots(QObject):
                 AdCreatorID = Ad[HirajBase.ResponseKeys.Search.authorId] ,
                 AdCreatorUsername = Ad[HirajBase.ResponseKeys.Search.authorUsername]
             )
-            self.HirajBase.Profile(Ad[HirajBase.ResponseKeys.Search.id])
+            self.HirajBase.Profile(Ad[HirajBase.ResponseKeys.Search.authorId])
             Lead['UserName'] = Ad[HirajBase.ResponseKeys.Search.authorUsername]
             Lead['PhoneNumber'] = self.HirajBase.PostContact(Ad[HirajBase.ResponseKeys.Search.id])
             Lead['Title'] = Ad[HirajBase.ResponseKeys.Search.title]
@@ -381,22 +407,24 @@ class HirajSlots(QObject):
             print(Lead)
     
 
-# h = HirajSlots(
-#     Proxy = ProxyFilterAPI.ProxyFlags.NoProxy,
 
-# )
+h = HirajSlots(
+    Proxy = ProxyFilterAPI.ProxyFlags.NoProxy,
 
-# h.Search(**{
-#         HirajBase.RequestKeys.Search.tag:"مستلزمات شخصية",
-#         HirajBase.RequestKeys.Search.cities:[
-#                 "الرياض"
-#             ],
-#         HirajBase.RequestKeys.Search.search:"ساعة"
-#     })
+)
+
+h.Search(**{
+        HirajBase.RequestKeys.Search.tag:"مستلزمات شخصية",
+        HirajBase.RequestKeys.Search.cities:[
+                "الرياض"
+            ],
+        HirajBase.RequestKeys.Search.search:"ساعة"
+    })
 
 
-h = HirajBase(Proxy=ProxyFilterAPI.ProxyFlags.RandomProxy)
-h.PostContact(110207944)
+# h = HirajBase(Proxy=ProxyFilterAPI.ProxyFlags.NoProxy)
+
+# h.PostContact(109876295)
 
 
 
