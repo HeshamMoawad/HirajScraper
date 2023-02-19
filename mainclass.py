@@ -161,6 +161,7 @@ class HirajBase(QObject):
         super().__init__()
         self.generator = Generator()
 
+
     def setCreator(self,AdID:int,AdCreatorID:int,AdCreatorUsername:str):
         self.AdID = AdID
         self.AdCreatorID = AdCreatorID
@@ -374,7 +375,6 @@ class HirajSlots(QObject):
         self.TranslateAdsInfo(ads=AdsData['Result'],breakwhenphone=False,comments=comments)
             
 
-
     def Comments(self,PostID:int):
         commenterNames = self.HirajBase.Comments(PostID)['Result']
         for name in commenterNames:
@@ -404,9 +404,6 @@ class HirajSlots(QObject):
                     break
             if comments == HirajBase.Flags.Yes :
                 self.Comments(Ad[HirajBase.ResponseKeys.Search.id])
-
-    # def similarPosts(self,PhonesList):
-    #     for phone in PhonesList :
 
 
 
