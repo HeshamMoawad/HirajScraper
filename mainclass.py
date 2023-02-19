@@ -1,6 +1,5 @@
 from time import  sleep
-import json , requests , json  , random
-from ProxyFilterClass import ProxyFilterAPI
+import json , requests , json  
 from Packages import  (
     DataBase , 
     QObject,
@@ -8,9 +7,6 @@ from Packages import  (
     DateOperations ,
     Generator
     )
-
-
-
 
 
 
@@ -143,9 +139,7 @@ class HirajBase(QObject):
 
 
     def __init__(
-        self ,
-        Proxy:ProxyFilterAPI.ProxyFlags=ProxyFilterAPI.ProxyFlags.NoProxy ,
-
+        self 
         ) -> None:
 
         self.Data = DataBase('Data\DataBase.db')
@@ -367,10 +361,9 @@ class HirajSlots(QObject):
 
     def __init__(
         self ,
-        Proxy:ProxyFilterAPI.ProxyFlags = ProxyFilterAPI.ProxyFlags.NoProxy ,
         FastLevel:FastLevelFlags = FastLevelFlags.Normal
         ) -> None:
-        self.HirajBase = HirajBase(Proxy)
+        self.HirajBase = HirajBase()
         super().__init__()
         self.HirajBase.msg.connect(self.msg.emit)
         self.FastLevel = FastLevel
