@@ -22,6 +22,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from styles import Styles
 import string
 import random
+import requests 
+import threading as thr
+from bs4 import BeautifulSoup 
+
+
+
+
 
 ####################################################
 
@@ -2202,3 +2209,89 @@ Mozilla/5.0 (iPhone; CPU iPhone OS 8_4 like Mac OS X) AppleWebKit/600.1.4 (KHTML
 
     def getRandomUserAgent(self) -> str :
         return str(self.UserAgentList[random.randint(0,len(self.UserAgentList))]).replace("\n","")
+
+
+class ProxyFilterAPI(object): # From  https://free-proxy-list.net/ 
+    Yes = 'yes'
+    No = 'no'
+    class ProxyFlags():
+        RandomProxy = 'RandomProxy'
+        NoProxy = 'NoProxy'
+
+    def __init__(self) -> None:
+        self.Threads = []  # List Of Threads that is Working
+        self.Errors = []  # Errors in https request 
+        self.ProxiesList = [] # Good Proxies
+        self.start = 0
+        self.end = 0
+
+
+    def getFreshProxyList(
+        self,
+        httpsFilter:str ,
+        ExportToTXT:bool= False ,
+        ):
+        ProxyList = []
+        response = requests.get(url = 'https://free-proxy-list.net/')
+        self.soup = BeautifulSoup(response.text,'html.parser')
+        table = self.soup.find("tbody")
+        rows = table.find_all("tr")
+        for row in rows :
+            row = row.find_all('td')
+            ip = row[0].text
+            port = row[1].text
+            https = row[6].text
+            #print(f"{ip}:{port} --> https:{https}")
+            if https == httpsFilter :
+                ip_port = f"{ip}:{port}"
+                ProxyList.append(ip_port)
+        if ExportToTXT == True :
+            with open("Proxies.txt",'w+')as file :
+                file.writelines([ip_port+"\n" for ip_port in ProxyList])
+                file.close()
+        return ProxyList
+
+
+    def testProxy(self,ip_port):
+        proxy = {'http':ip_port,'https':ip_port}
+        try:
+            response = requests.get(url = "http://httpbin.org/ip",proxies= proxy ,timeout = 5)
+            self.ProxiesList.append(ip_port)
+        except Exception as e :
+            self.Errors.append(e)
+
+
+    def threadingRequstFilter(self,ip_portLists):
+        for iplist in ip_portLists:
+            task = thr.Thread(target = self.testProxy,args = (iplist,))
+            self.Threads.append(task)
+            task.start()
+
+    def wait(self)-> None:
+        for task in self.Threads:
+            if task.is_alive() :
+                task.join()
+
+    def autoAPI(self,wait:bool= True):
+        self.ProxiesList = []
+        firstlist = self.getFreshProxyList(httpsFilter=self.Yes)
+        self.threadingRequstFilter(firstlist)
+        if wait == True :
+            self.wait()
+        self.start = time.time()
+        return self.ProxiesList
+        
+    def getRandomProxyWithTimeOut(self,timeout:int): # Timeout (Sec)
+        self.end = time.time()
+        if self.start == 0 or round(self.end - self.start,ndigits=0) >= timeout :
+            self.autoAPI()
+            print(self.ProxiesList)
+            return self.ProxiesList[random.randint(0,len(self.ProxiesList)-1)]
+        else :
+            return self.ProxiesList[random.randint(0,len(self.ProxiesList)-1)]
+            
+
+
+
+
+
