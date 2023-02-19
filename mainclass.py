@@ -1,7 +1,7 @@
 from time import  sleep
 import json , requests , json  , random
 from ProxyFilterClass import ProxyFilterAPI
-from MyPyQt5 import  (
+from Packages import  (
     DataBase , 
     QObject,
     pyqtSignal ,
@@ -23,6 +23,8 @@ class HirajBase(QObject):
     class Flags():
         Random = 'Random'
         Normal = 'Normal'
+        Yes = 'Yes'
+        No = 'No'
 
     class DataTableFlags():
         AdsData = 'AdsData'
@@ -165,12 +167,10 @@ class HirajBase(QObject):
         super().__init__()
         self.generator = Generator()
 
-
     def setCreator(self,AdID:int,AdCreatorID:int,AdCreatorUsername:str):
         self.AdID = AdID
         self.AdCreatorID = AdCreatorID
         self.AdCreatorUsername = AdCreatorUsername
-
 
     def addToDataBase(self,table:DataTableFlags,response:dict):
         response['AdID'] = self.AdID
@@ -185,7 +185,6 @@ class HirajBase(QObject):
             **response
         )
         
-
     def resolveSearchResponse(self,response:dict) -> dict: #  Done #####
         resultIDs = []
         for Ad in response["data"]["search"]["items"] :
@@ -202,9 +201,8 @@ class HirajBase(QObject):
         HasNextPage = response["data"]["search"]["pageInfo"]['hasNextPage']
         return {"Result": resultIDs ,"HasNextPage":HasNextPage}
 
-
     def resolveCommentsResponse(self,response:dict)-> dict: # Done  #######
-        commenterIDs = []
+        commenterNames = []
         for comment in response["data"]['comments']['items'] :
             id = comment['id']
             if not self.Data.exist(table = "CommentsData" ,column='id' ,val = id ):
@@ -213,10 +211,9 @@ class HirajBase(QObject):
                     response = comment
                 )
                 self.UserIDSignal.emit(int(comment['authorId']))
-                commenterIDs.append(comment['authorId'])
+                commenterNames.append(comment[self.ResponseKeys.Comments.authorUsername])
         HasNextPage = response["data"]['comments']['pageInfo']['hasNextPage']
-        return {"Result": commenterIDs ,"HasNextPage":HasNextPage}
-
+        return {"Result": commenterNames ,"HasNextPage":HasNextPage}
 
     def resolvePostContactResponse(self,response:dict)-> str: # Done #####
         response = response['data']['postContact']
@@ -227,7 +224,6 @@ class HirajBase(QObject):
         self.LeadsSignal.emit({'UserName':self.AdCreatorUsername ,'PhoneNumber':response[self.ResponseKeys.postContact.contactMobile]})
         return response[self.ResponseKeys.postContact.contactMobile]
 
-        
     def resolveSimilarPostsResponse(self,response:dict)-> list : # Done
         resultIDs = []
         similarPostID = response["data"]['similarPosts']['id']
@@ -244,7 +240,6 @@ class HirajBase(QObject):
                 resultIDs.append(id)
         return resultIDs
         
-        
     def resolveFetchAdsResponse(self,response:dict)->dict:
         resultIDs = []
         for Ad in response['data']['posts']['items'] :
@@ -252,15 +247,13 @@ class HirajBase(QObject):
             if not self.Data.exist(table=self.DataTableFlags.AdsData , column = 'AdID',val = id) :
                 Ad['MethodType'] = 'FetchAds'
                 Ad['similarPostID'] = 0
-
                 self.addToDataBase(
                     table = self.DataTableFlags.AdsData,
                     response = Ad
                 )
-                resultIDs.append(id)
+                resultIDs.append(Ad)
         HasNextPage = response['data']['posts']['pageInfo']['hasNextPage']
         return {"Result": resultIDs ,"HasNextPage":HasNextPage}
-
 
     def resolveProfileResponse(self,response:dict):
         response = response['data']['profile']
@@ -272,7 +265,6 @@ class HirajBase(QObject):
                 response = response
             )
         
-
     def resolveUserResponse(self,response:dict)-> int:
         response = response['data']['user']
         self.addToDataBase(
@@ -296,7 +288,6 @@ class HirajBase(QObject):
             clientID = {}
         return clientID
 
-
     def sendRequest(
         self,
         RequestType:PayloadQueryTypeFlags,
@@ -316,7 +307,6 @@ class HirajBase(QObject):
             params = self.getClientID(ClientID)
         )
         return  response.json()
-
 
     def Search(self,**kwargs):
         Response = self.sendRequest(self.PayloadQueryTypeFlags.Search,**kwargs)
@@ -347,7 +337,6 @@ class HirajBase(QObject):
             ClientID = self.Flags.Random ,
             **{self.RequestKeys.postContact.postId:PostID}
         )
-        # print(Response)
         return self.resolvePostContactResponse(Response)
 
     def SimilarPosts(self,PostIDSimilar:int):
@@ -373,9 +362,9 @@ class HirajSlots(QObject):
         SuperFast = 'SuperFast'
         All = [Normal,High,SuperFast]
 
-
     LeadSignal = pyqtSignal(dict)
     msg = pyqtSignal(str)
+
     def __init__(
         self ,
         Proxy:ProxyFilterAPI.ProxyFlags = ProxyFilterAPI.ProxyFlags.NoProxy ,
@@ -387,39 +376,59 @@ class HirajSlots(QObject):
         self.FastLevel = FastLevel
         
 
-    def Search(self,**kwargs):
+    def Search(self,comments:HirajBase.Flags = HirajBase.Flags.No,**kwargs):
         AdsData = self.HirajBase.Search(**kwargs)
-        for Ad in AdsData['Result']:
+        self.TranslateAdsInfo(ads=AdsData['Result'],breakwhenphone=False,comments=comments)
+            
+
+
+    def Comments(self,PostID:int):
+        commenterNames = self.HirajBase.Comments(PostID)['Result']
+        for name in commenterNames:
+            ads = self.HirajBase.FetchAds(
+                **{self.HirajBase.RequestKeys.FetchAds.authorUsername:name}
+            )['Result']
+            self.TranslateAdsInfo(ads=ads,breakwhenphone=True)
+
+
+    def TranslateAdsInfo(self, ads ,breakwhenphone:bool = False , comments:HirajBase.Flags = HirajBase.Flags.No):
+        for Ad in ads:
             Lead = {}
             self.HirajBase.setCreator(
-                AdID = Ad[HirajBase.ResponseKeys.Search.id] ,
-                AdCreatorID = Ad[HirajBase.ResponseKeys.Search.authorId] ,
-                AdCreatorUsername = Ad[HirajBase.ResponseKeys.Search.authorUsername]
-            )
+            AdID = Ad[HirajBase.ResponseKeys.Search.id] ,
+            AdCreatorID = Ad[HirajBase.ResponseKeys.Search.authorId] ,
+            AdCreatorUsername = Ad[HirajBase.ResponseKeys.Search.authorUsername]
+        )
             self.HirajBase.Profile(Ad[HirajBase.ResponseKeys.Search.authorId])
             Lead['UserName'] = Ad[HirajBase.ResponseKeys.Search.authorUsername]
-            Lead['PhoneNumber'] = self.HirajBase.PostContact(Ad[HirajBase.ResponseKeys.Search.id])
-            Lead['Title'] = Ad[HirajBase.ResponseKeys.Search.title]
-            Lead['LastSeen'] = str(self.HirajBase.Date.translateTimeFromStampToDate(
-                stamp = float(self.HirajBase.User(Ad[HirajBase.ResponseKeys.Search.authorUsername]))
-                ))
-            self.LeadSignal.emit(Lead)
-            print(Lead)
-    
+            Lead['Title'] = Ad[self.HirajBase.ResponseKeys.FetchAds.title]
+            Lead['PhoneNumber'] = self.HirajBase.PostContact(Ad[self.HirajBase.ResponseKeys.FetchAds.id])
+            Lead['LastSeen'] = str(self.HirajBase.Date.translateTimeFromStampToDate(stamp = float(self.HirajBase.User(Ad[HirajBase.ResponseKeys.Search.authorUsername]))))
+            if Lead['PhoneNumber'] != '' :
+                self.LeadSignal.emit(Lead)
+                print(Lead)
+                if breakwhenphone :
+                    break
+            if comments == HirajBase.Flags.Yes :
+                self.Comments(Ad[HirajBase.ResponseKeys.Search.id])
+
+    # def similarPosts(self,PhonesList):
+    #     for phone in PhonesList :
 
 
-h = HirajSlots(
-    Proxy = ProxyFilterAPI.ProxyFlags.NoProxy,
 
-)
+# h = HirajSlots(
+#     Proxy = ProxyFilterAPI.ProxyFlags.NoProxy,
 
-h.Search(**{
-        HirajBase.RequestKeys.Search.tag:"مستلزمات شخصية",
-        HirajBase.RequestKeys.Search.cities:[
-                "الرياض"
-            ],
-        HirajBase.RequestKeys.Search.search:"ساعة"
-    })
+# )
+
+# h.Search(**{
+#         HirajBase.RequestKeys.Search.tag:"مستلزمات شخصية",
+#         HirajBase.RequestKeys.Search.cities:[
+#                 "الرياض"
+#             ],
+#         HirajBase.RequestKeys.Search.search:"ساعة"
+#     })
 
 
 # h = HirajBase(Proxy=ProxyFilterAPI.ProxyFlags.NoProxy)
