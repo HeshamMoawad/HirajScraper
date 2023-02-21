@@ -184,10 +184,10 @@ class HirajBase(QObject):
     def resolveSearchResponse(self,response:dict) -> dict: #  Done #####
         resultIDs = []
         for Ad in response["data"]["search"]["items"] :
-            id = Ad[self.ResponseKeys.Search.id]
-            if not self.Data.exist(table = self.DataTableFlags.AdsData ,column = 'AdID'  ,val = id ):
-                Ad['MethodType'] = 'Search'
-                Ad['similarPostID'] = 0
+            post = PostObject(Ad)
+            
+            if not self.Data.exist(table = self.DataTableFlags.AdsData ,column = 'AdID'  ,val = post.id ):
+                post.MethodType = 'Search'
                 self.addToDataBase(
                     table = self.DataTableFlags.AdsData ,
                     response = Ad
@@ -351,6 +351,148 @@ class HirajBase(QObject):
 
 
 
+
+
+class PostObject(object):
+    class RequestKeys():
+
+        class Search():
+            tag = 'tag' # Str
+            cities = 'cities' # List
+            search = 'search' # Keyword
+            page = 'page' # Page
+
+        class Profile():
+            id = 'id'
+        
+        class SimilarPosts():
+            id = 'id'
+        
+        class Comments():
+            postId = 'postId'
+            page = 'page'
+
+        class postContact():
+            postId = 'postId'
+            isManualRequest = 'isManualRequest'
+
+        class User():
+            Username = 'username'
+
+        class FetchAds():
+            city = 'city' # Str
+            authorUsername = 'authorUsername'
+            tag = 'tag'
+            PostID = 'id' # List
+            page = 'page' 
+
+    class ResponseKeys():
+        class AdInfo():
+            id = 'id' # Int
+            authorUsername = 'authorUsername' # Str
+            authorId = 'authorId'  # Int
+            title = 'title' # Str
+            URL = 'URL' # Str
+            city = 'city' # Str
+            geoCity = 'geoCity' # Str
+            geoNeighborhood = 'geoNeighborhood' # Str
+            commentCount = 'commentCount' # Int
+            commentEnabled = 'commentEnabled' # Bool
+            bodyTEXT = 'bodyTEXT' # Str
+            imagesList = 'imagesList' # List
+            tags = 'tags' # List
+            postDate = 'postDate'  # Int
+            updateDate = 'updateDate' # Int
+            status = 'status' # Bool
+
+        class Search(AdInfo):
+            ...
+
+        class FetchAds(AdInfo):
+            ...
+
+        class Comments():
+            id = "id"
+            authorUsername = "authorUsername"
+            authorId = "authorId"
+            body = "body"
+            isNewUser = "isNewUser"
+            status = "status"
+            deleteReason = "deleteReason"
+            date = "date"
+
+        class postContact():
+            contactText = 'contactText'
+            contactMobile = 'contactMobile'
+
+        class similarPosts(AdInfo):
+            ...
+
+        class Profile():
+            id = "id"
+            handler = "handler"
+            type = "type"
+            description = "description"
+            contacts = 'contacts'
+            class Contacts():
+                info= "info" # PhoneNumber
+
+        class  User():
+            id = "id"
+            username = "username"
+            registrationDate = "registrationDate"
+            mobile = "mobile"
+            discount = "discount"
+            isMember = "isMember"
+            isAdmin = "isAdmin"
+            isBlocked = "isBlocked"
+            lastSeen= "lastSeen"
+            countFollowers= "countFollowers"
+
+
+    def __init__(self,Post:dict):
+        self.id = Post[self.ResponseKeys.Search.id] if self.ResponseKeys.Search.id in Post.keys() else 0
+        self.authorUsername = Post[self.ResponseKeys.Search.authorUsername] if self.ResponseKeys.Search.authorUsername in Post.keys() else 'None' 
+        self.authorId = Post[self.ResponseKeys.Search.authorId] if self.ResponseKeys.Search.authorId in Post.keys() else 0
+        # self.hasImage = Post[self.ResponseKeys.Search.]
+        self.title = Post[self.ResponseKeys.Search.title] if self.ResponseKeys.Search.title in Post.keys() else 'None'
+        self.URL = Post[self.ResponseKeys.Search.URL] if self.ResponseKeys.Search.URL in Post.keys() else 'None'
+        self.city = Post[self.ResponseKeys.Search.city] if self.ResponseKeys.Search.city in Post.keys() else 'None'
+        self.geoCity = Post[self.ResponseKeys.Search.geoCity] if self.ResponseKeys.Search.geoCity in Post.keys() else 'None'
+        self.geoNeighborhood = Post[self.ResponseKeys.Search.geoNeighborhood] if self.ResponseKeys.Search.geoNeighborhood in Post.keys() else 'None'
+        # self.geoHash = Post[self.ResponseKeys.Search.ge]
+        self.commentCount = Post[self.ResponseKeys.Search.commentCount] if self.ResponseKeys.Search.commentCount in Post.keys() else 0
+        self.commentEnabled = Post[self.ResponseKeys.Search.commentEnabled]  if self.ResponseKeys.Search.commentEnabled in Post.keys() else False
+        self.bodyTEXT = Post[self.ResponseKeys.Search.bodyTEXT]  if self.ResponseKeys.Search.bodyTEXT in Post.keys() else 'None'
+        self.imagesList = Post[self.ResponseKeys.Search.imagesList] if self.ResponseKeys.Search.imagesList in Post.keys() else []
+        self.tags = Post[self.ResponseKeys.Search.tags] if self.ResponseKeys.Search.tags in Post.keys() else []
+        self.postDate = Post[self.ResponseKeys.Search.postDate] if self.ResponseKeys.Search.postDate in Post.keys() else 0
+        self.updateDate = Post[self.ResponseKeys.Search.updateDate] if self.ResponseKeys.Search.updateDate in Post.keys() else 0
+        self.status = Post[self.ResponseKeys.Search.status] if self.ResponseKeys.Search.updateDate in Post.keys() else True
+        # self.upRank = Post[self.ResponseKeys.Search]
+        # self.downRank = Post[self.ResponseKeys.Search]
+        self.MethodType = Post['MethodType'] if 'MethodType' in Post.keys() else 'None' 
+        self.similarPostID = Post['similarPostID'] if 'similarPostID' in Post.keys() else 0
+        
+
+    def __str__(self) -> str:
+        return str(self.__dict__)
+        
+    @property
+    def dictOfObject(self):
+        return self.__dict__
+
+
+
+h = PostObject({})
+print(type(h.dictOfObject))
+print(h.dictOfObject)
+print(type(h))
+print(h)
+
+
+
+
 class HirajSlots(QObject):
     class FastLevelFlags():
         Normal = 'Normal'
@@ -407,9 +549,9 @@ class HirajSlots(QObject):
                 self.Comments(Ad[HirajBase.ResponseKeys.Search.id])
 
     def Similar(self,numbersList:list ,comments:HirajBase.Flags = HirajBase.Flags.No):
-        maindf = self.HirajBase.Data.getTabelIntoDataFrame('ContactsData')
-        dflist = []
-        print(maindf)
+        # maindf = self.HirajBase.Data.getTabelIntoDataFrame('ContactsData')
+        # dflist = []
+        # print(maindf)
         idslist = [self.HirajBase.Data.Search('ContactsData','contactMobile',number,0) for number in numbersList ]
         for id in idslist:
             if id != None :
@@ -432,10 +574,8 @@ class HirajSlots(QObject):
 #         HirajBase.RequestKeys.Search.search:"ساعة"
 #     })
 
-
-# h = HirajBase(Proxy=ProxyFilterAPI.ProxyFlags.NoProxy)
-
 # h.PostContact(109876295)
+
 
 
 
