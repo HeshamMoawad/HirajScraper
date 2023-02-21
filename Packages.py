@@ -708,27 +708,18 @@ class DataBase():
         self.cur.execute(f"""SELECT * FROM {table} WHERE {column} = '{val}'; """)
         return True if self.cur.fetchall() != [] else False
     
-    
-    # def add_to_db(self,table:str,**kwargs):
-    #     """
-    #     Adding values to Database :-\n
-    #     example : \n
-    #     'if you want to add number to (PhoneNumber)column in (userdata) table in DB'\n
-    #     add_to_db(\n
-    #         table = userdata ,\n
-    #         PhoneNumber = value , # number that you want to add
-    #     )
-    #     """
-    #     try:
-            
-    #         self.cur.execute(f"""
-    #         INSERT INTO {table} {str(tuple(kwargs.keys())).replace("'","")}
-    #         VALUES {tuple(kwargs.values())} ; 
-    #         """)
-    #         self.con.commit()
-    #     except Exception as e:
-    #         print(f"\n{e} \nError in Database \n")
+    def Search(self,table,column,val,indexretval:int):
+        self.cur.execute(f"""SELECT * FROM {table} WHERE {column} = '{val}'; """)
+        try:
+            return self.cur.fetchall()[0][indexretval]
+        except Exception as e :
+            print(e)
+            return None
+        
 
+
+    def getTabelIntoDataFrame(self,table:str)->pandas.DataFrame:
+        return pandas.read_sql_query(f'SELECT * FROM {table}',con=self.con)
 
     def addToDataAsDict(self,table:str,**kwargs):
         """
