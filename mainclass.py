@@ -5,7 +5,8 @@ from Packages import  (
     QObject,
     pyqtSignal ,
     DateOperations ,
-    Generator
+    Generator , 
+    pandas
     )
 
 
@@ -220,7 +221,7 @@ class HirajBase(QObject):
         return response[self.ResponseKeys.postContact.contactMobile]
 
     def resolveSimilarPostsResponse(self,response:dict)-> list : # Done
-        resultIDs = []
+        result = []
         similarPostID = response["data"]['similarPosts']['id']
         for Ad in response["data"]['similarPosts']['groupTags'][0]['posts']['items'] :
             id = Ad['id']
@@ -232,8 +233,8 @@ class HirajBase(QObject):
                     response = Ad
                 )
                 self.AdIDSignal.emit(int(id))
-                resultIDs.append(id)
-        return resultIDs
+                result.append(Ad)
+        return result
         
     def resolveFetchAdsResponse(self,response:dict)->dict:
         resultIDs = []
@@ -405,12 +406,23 @@ class HirajSlots(QObject):
             if comments == HirajBase.Flags.Yes :
                 self.Comments(Ad[HirajBase.ResponseKeys.Search.id])
 
+    def Similar(self,numbersList:list ,comments:HirajBase.Flags = HirajBase.Flags.No):
+        maindf = self.HirajBase.Data.getTabelIntoDataFrame('ContactsData')
+        dflist = []
+        print(maindf)
+        idslist = [self.HirajBase.Data.Search('ContactsData','contactMobile',number,0) for number in numbersList ]
+        for id in idslist:
+            if id != None :
+                ads = self.HirajBase.SimilarPosts(id)
+                self.TranslateAdsInfo(ads,comments,breakwhenphone=False)
+            
+        
 
 
-# h = HirajSlots(
-#     Proxy = ProxyFilterAPI.ProxyFlags.NoProxy,
 
-# )
+# h = HirajSlots()
+
+# h.Similar(['598994886'])
 
 # h.Search(**{
 #         HirajBase.RequestKeys.Search.tag:"مستلزمات شخصية",
