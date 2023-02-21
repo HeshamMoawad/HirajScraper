@@ -6,8 +6,114 @@ from Packages import  (
     pyqtSignal ,
     DateOperations ,
     Generator , 
-    pandas
+    typing
     )
+
+class PayloadQueryTypeFlags():
+    FetchAds = 'FetchAds'
+    Comments = 'comments'
+    PostContact = 'postContact'
+    SimilarPosts = 'similarPosts'
+    Search = 'Search'
+    Profile = 'Profile'
+    User = 'user' 
+
+class RequestKeys():
+
+    class Search():
+        tag = 'tag' # Str
+        cities = 'cities' # List
+        search = 'search' # Keyword
+        page = 'page' # Page
+
+    class Profile():
+        id = 'id'
+    
+    class SimilarPosts():
+        id = 'id'
+    
+    class Comments():
+        postId = 'postId'
+        page = 'page'
+
+    class postContact():
+        postId = 'postId'
+        isManualRequest = 'isManualRequest'
+
+    class User():
+        Username = 'username'
+
+    class FetchAds():
+        city = 'city' # Str
+        authorUsername = 'authorUsername'
+        tag = 'tag'
+        PostID = 'id' # List
+        page = 'page' 
+
+class ResponseKeys():
+    class AdInfo():
+        id = 'id' # Int
+        authorUsername = 'authorUsername' # Str
+        authorId = 'authorId'  # Int
+        title = 'title' # Str
+        URL = 'URL' # Str
+        city = 'city' # Str
+        geoCity = 'geoCity' # Str
+        geoNeighborhood = 'geoNeighborhood' # Str
+        commentCount = 'commentCount' # Int
+        commentEnabled = 'commentEnabled' # Bool
+        bodyTEXT = 'bodyTEXT' # Str
+        imagesList = 'imagesList' # List
+        tags = 'tags' # List
+        postDate = 'postDate'  # Int
+        updateDate = 'updateDate' # Int
+        status = 'status' # Bool
+
+    class Search(AdInfo):
+        ...
+
+    class FetchAds(AdInfo):
+        ...
+
+    class Comments():
+        id = "id"
+        authorUsername = "authorUsername"
+        authorId = "authorId"
+        body = "body"
+        isNewUser = "isNewUser"
+        status = "status"
+        deleteReason = "deleteReason"
+        date = "date"
+
+    class postContact():
+        contactText = 'contactText'
+        contactMobile = 'contactMobile'
+
+    class similarPosts(AdInfo):
+        ...
+
+    class Profile():
+        id = "id"
+        handler = "handler"
+        type = "type"
+        description = "description"
+        contacts = 'contacts'
+        class Contacts():
+            info= "info" # PhoneNumber
+
+    class  User():
+        id = "id"
+        username = "username"
+        registrationDate = "registrationDate"
+        mobile = "mobile"
+        discount = "discount"
+        isMember = "isMember"
+        isAdmin = "isAdmin"
+        isBlocked = "isBlocked"
+        lastSeen= "lastSeen"
+        countFollowers= "countFollowers"
+
+
 
 
 
@@ -185,12 +291,11 @@ class HirajBase(QObject):
         resultIDs = []
         for Ad in response["data"]["search"]["items"] :
             post = PostObject(Ad)
-            
             if not self.Data.exist(table = self.DataTableFlags.AdsData ,column = 'AdID'  ,val = post.id ):
                 post.MethodType = 'Search'
                 self.addToDataBase(
                     table = self.DataTableFlags.AdsData ,
-                    response = Ad
+                    response = post.dictOfObject
                     )
                 self.AdIDSignal.emit(int(id))
                 resultIDs.append(Ad)
@@ -350,9 +455,6 @@ class HirajBase(QObject):
         return self.resolveUserResponse(Response)
 
 
-
-
-
 class PostObject(object):
     class RequestKeys():
 
@@ -479,16 +581,86 @@ class PostObject(object):
         return str(self.__dict__)
         
     @property
-    def dictOfObject(self):
+    def dictOfObject(self)->dict:
         return self.__dict__
 
 
+class PostContactObject(object):
 
-h = PostObject({})
-print(type(h.dictOfObject))
-print(h.dictOfObject)
-print(type(h))
-print(h)
+    def __init__(self,contactdict:dict) -> None:
+        self.contactText = contactdict[ResponseKeys.postContact.contactText]
+        self.contactMobile = contactdict[ResponseKeys.postContact.contactMobile]
+        
+    @property
+    def dictOfObject(self)->dict:
+        return {'postContact':self.__dict__}
+
+    def __str__(self) -> str:
+        return str(self.dictOfObject)
+
+
+
+class ResponseObject(object):
+
+    def __init__(self,response:dict) -> None:
+        self.Response = response
+        if 'search' in response['data'].keys() :
+            self.Type = PayloadQueryTypeFlags.Search #'Search'
+            self.hasNextPage = response['data']['pageInfo']['hasNextPage']
+
+        elif 'similarPosts' in response['data'].keys() :
+            self.Type = PayloadQueryTypeFlags.SimilarPosts
+            self.hasNextPage = False
+
+        elif 'posts' in response['data'].keys() :
+            self.Type = PayloadQueryTypeFlags.FetchAds
+            self.hasNextPage = response['data']['posts']['pageInfo']['hasNextPage']
+        
+        elif 'postContact' in response['data'].keys():
+            self.Type = PayloadQueryTypeFlags.PostContact
+            self.hasNextPage = False
+        
+        elif 'comments' in response['data'].keys():
+            self.Type = PayloadQueryTypeFlags.Comments
+            self.hasNextPage =  response['data']['comments']['pageInfo']['hasNextPage']
+
+        elif 'profile' in response['data'].keys():
+            self.Type = PayloadQueryTypeFlags.Profile
+            self.hasNextPage =  False
+
+        elif 'user' in response['data'].keys():
+            self.Type = PayloadQueryTypeFlags.User
+            self.hasNextPage =  False
+
+
+    @property
+    def Posts(self)-> typing.List[PostObject]:
+        Posts = []
+        if self.Type == PayloadQueryTypeFlags.Search :
+            for Ad in self.Response["data"]["search"]["items"] :
+                Post = PostObject(Ad)
+                Posts.append(Post)
+
+        elif self.Type == PayloadQueryTypeFlags.SimilarPosts :
+            for Ad in self.Response["data"]['similarPosts']['groupTags'][0]['posts']['items'] :
+                Post = PostObject(Ad)
+                Posts.append(Post)
+
+        elif self.Type == PayloadQueryTypeFlags.FetchAds :
+            for Ad in self.Response['data']['posts']['items'] :
+                Post = PostObject(Ad)
+                Posts.append(Post)
+
+        return Posts
+
+    
+    @property
+    def PostContact(self):
+        pass
+
+
+
+
 
 
 
@@ -549,9 +721,6 @@ class HirajSlots(QObject):
                 self.Comments(Ad[HirajBase.ResponseKeys.Search.id])
 
     def Similar(self,numbersList:list ,comments:HirajBase.Flags = HirajBase.Flags.No):
-        # maindf = self.HirajBase.Data.getTabelIntoDataFrame('ContactsData')
-        # dflist = []
-        # print(maindf)
         idslist = [self.HirajBase.Data.Search('ContactsData','contactMobile',number,0) for number in numbersList ]
         for id in idslist:
             if id != None :
