@@ -67,6 +67,8 @@ class Search(QObject):
         self.counterLabel.setText('Count : 0')
         self.treeWidget = MyQTreeWidget(self.frame_2,counterLabel=self.counterLabel)
         self.treeWidget.setColumns(['UserName','PhoneNumber','Title','LastSeen'])
+        self.treeWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.treeWidget.customContextMenuRequested.connect(self.menu)
         self.verticalLayout.addWidget(self.treeWidget)
         self.verticalLayout.addWidget(self.counterLabel, 0, QtCore.Qt.AlignHCenter)
         self.verticalLayout_2.addWidget(self.frame_2)
@@ -79,8 +81,8 @@ class Search(QObject):
     def menu (self):
         menu = MyCustomContextMenu(
             Actions_arg=[
-                "Copy AreaCode", 
-                "Copy Number", 
+                "Copy UserName", 
+                "Copy PhoneNumber", 
                 "Delete Row", 
                 "Export To Excel", 
                 "Clear Data" ,
@@ -465,6 +467,8 @@ class Similar(QObject):
         self.CounterLabel.setText('Count : 0')
         self.treeWidget = MyQTreeWidget(self.TreeWidgetFrame,counterLabel=self.CounterLabel)
         self.treeWidget.setColumns(['UserName','PhoneNumber','Title','LastSeen'])
+        self.treeWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.treeWidget.customContextMenuRequested.connect(self.menu)
         self.verticalLayout.addWidget(self.treeWidget)
         self.verticalLayout.addWidget(self.CounterLabel, 0, QtCore.Qt.AlignHCenter)
         self.verticalLayout_2.addWidget(self.TreeWidgetFrame)
