@@ -19,7 +19,7 @@ class Search(QObject):
     Name = ""
     def __init__(self, parent):
         super().__init__()
-        # ['UserName','Title','PhoneNumber','LastSeen']
+        # ['UserName','PhoneNumber','Title','LastSeen']
         self.ExportRange = {'UserName':0,'Title':1,'PhoneNumber':2,'LastSeen':3 }
         self.gridLayout = QtWidgets.QGridLayout(parent)
         self.MainFrame = QtWidgets.QFrame(parent)
@@ -66,7 +66,7 @@ class Search(QObject):
         self.counterLabel = QtWidgets.QLabel(self.frame_2)
         self.counterLabel.setText('Count : 0')
         self.treeWidget = MyQTreeWidget(self.frame_2,counterLabel=self.counterLabel)
-        self.treeWidget.setColumns(['UserName','Title','PhoneNumber','LastSeen'])
+        self.treeWidget.setColumns(['UserName','PhoneNumber','Title','LastSeen'])
         self.verticalLayout.addWidget(self.treeWidget)
         self.verticalLayout.addWidget(self.counterLabel, 0, QtCore.Qt.AlignHCenter)
         self.verticalLayout_2.addWidget(self.frame_2)
@@ -124,7 +124,7 @@ class Search(QObject):
 
 
 class Setting(QObject):
-    CATEGORIES = ['حراج السيارات', 'حراج العقار', 'حراج الأجهزة', 'مواشي وحيوانات وطيور', 'اثاث', 'مستلزمات شخصية', 'خدمات', 'وظائف', 'اطعمة ومشروبات', 'برمجة وتصاميم', 'مكتبة وفنون', 'صيد ورحلات']
+    CATEGORIES = ['كل الحراج','حراج السيارات', 'حراج العقار', 'حراج الأجهزة', 'مواشي وحيوانات وطيور', 'اثاث', 'مستلزمات شخصية', 'خدمات', 'وظائف', 'اطعمة ومشروبات', 'برمجة وتصاميم', 'مكتبة وفنون', 'صيد ورحلات']
     SUBCATEGORY = [['', 'هونشي', 'زوتي', 'ماهيندرا', 'ساوايست', 'تسلا', 'بايك', 'جاك JAC', 'ماكلارين', 'ماكسيس', 'ليفان', 'فيكتوري اوتو', 'فوتون', 'سي ام سي', 'جيتور', 'جى ام سي JMC', 'تاتا', 'الفا روميو', 'BYD', 'فاو FAW', 'جريت وول Great Wall', 'جي ايه سي GAC', 'هافال', 'بروتون', 'استون مارتن', 'سانج يونج', 'فيات', 'ساب', 'دايو', 'سيات', 'تشيري', 'سيتروين', 'فيراري', 'سكودا', 'اوبل', 'لامبورجيني', 'رولز رويس', 'مازيراتي', 'بيوك', ' رينو', 'شانجان', 'ZXAUTO', 'MG', 'سوبارو', 'جاكوار', 'بنتلي', 'بيجو', 'فولفو', 'ميركوري', 'جيلي', 'ديهاتسو', 'فولكس واجن', 'لنكولن', 'همر', 'انفنيتي', 'سوزوكي', 'اودي', 'بورش', 'كاديلاك', 'ايسوزو', 'لاند روفر', 'مازدا', 'ميتسوبيشي', 'جيب','كرايزلر', 'دودج', 'كيا', 'دبابات', 'بي ام دبليو', 'هوندا', 'مرسيدس', 'شاحنات ومعدات ثقيلة', 'جي ام سي', 'لكزس', 'جنسس', 'هونداي', 'نيسان', 'قطع غيار وملحقات', 'شيفروليه', 'فورد', 'تويوتا'], ['', 'بيوت للايجار', 'ادوار للايجار', 'مزارع للبيع', 'فلل للايجار', 'استراحات للبيع', 'عماره للايجار', 'محلات للايجار', 'محلات للتقبيل', 'استراحات للايجار', 'عمارة للبيع', 'اراضي تجارية للبيع', 'بيوت للبيع', 'شقق للبيع', 'فلل للبيع', 'شقق للايجار', 'اراضي للبيع'], ['', 'غسالة سامسونج', 'ثلاجة سامسونج', 'اجهزة غير مصنفة', 'هيتاشي Hitachi', 'باناسونيك Panasonic', 'مايكروسوفت Microsoft', 'ال جي LG', 'أرقام مميزة', 'حسابات واشتراكات', 'كاميرات تصوير', 'تلفزيونات وصوتيات', 'ألعاب إلكترونية', 'أجهزة كمبيوتر', 'أجهزة تابلت', 'جوالات'], ['', 'وبر', 'هامستر', 'سناجب', 'بط', 'ارانب', 'أسماك وسلاحف', 'بقر', 'كلاب', 'خيل', 'أبل', 'دجاج', 'قطط', 'حمام', 'ببغاء', 'ماعز', 'غنم'], ['', 'مجالس ومفروشات', 'طاولات وكراسي', 'خزائن ودواليب', 'تحف وديكور', 'أسرة ومراتب', 'أدوات منزلية', 'أثاث مكتبي', 'أثاث خارجي'], ['', 'ملابس أطفال', 'ملابس نسائية', 'ملابس رجالية', 'نظارات', 'مستلزمات رياضية', 'عطورات', 'ساعات'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات','زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفروسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['']]
     AREAS = ["كل المناطق","الرياض","الشرقيه","جده","مكه","ينبع","حفر الباطن","المدينة","الطايف","تبوك","القصيم","حائل","أبها","عسير","الباحة","جيزان","نجران","الجوف","عرعر","الكويت","الإمارات","البحرين"]
     msg = MyMessageBox()
@@ -400,3 +400,120 @@ class Sheets(QObject):
             total += int(self.treeWidget.topLevelItem(sheet).text(1))
         return total
         
+
+
+
+class Similar(QObject):
+    msg = MyMessageBox()
+
+    def __init__(self, parent) -> None:
+        super().__init__()
+        self.ExportRange = {'UserName':0,'Title':1,'PhoneNumber':2,'LastSeen':3 }
+        self.gridLayout = QtWidgets.QGridLayout(parent)
+        self.frame = QtWidgets.QFrame(parent)
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.frame)
+        self.Similar = QtWidgets.QFrame(self.frame)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.Similar)
+        self.SimilarLabel = QtWidgets.QLabel(self.Similar)
+        self.SimilarLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.SimilarLabel.setText('Similar Leads')
+        self.horizontalLayout_2.addWidget(self.SimilarLabel)
+        self.verticalLayout_2.addWidget(self.Similar)
+        self.NumbersFrame = QtWidgets.QFrame(self.frame)
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self.NumbersFrame)
+        self.NumbersLabel = QtWidgets.QLabel(self.NumbersFrame)
+        self.NumbersLabel.setText('Numbers')
+        self.horizontalLayout.addWidget(self.NumbersLabel, 0, QtCore.Qt.AlignHCenter)
+        self.plainTextEdit = QtWidgets.QPlainTextEdit(self.NumbersFrame)
+        self.plainTextEdit.setPlaceholderText('Enter Numbers That you want to Scrape Similar \nEnter numbers(same Format)like This :-\n550011122\n550011122\n550011122')
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        self.plainTextEdit.setSizePolicy(sizePolicy)
+        self.horizontalLayout.addWidget(self.plainTextEdit)
+        self.horizontalLayout.setStretch(0, 1)
+        self.horizontalLayout.setStretch(1, 2)
+        self.verticalLayout_2.addWidget(self.NumbersFrame)
+        self.ExportNameFrame = QtWidgets.QFrame(self.frame)
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.ExportNameFrame)
+        self.ExportNameLabel = QtWidgets.QLabel(self.ExportNameFrame)
+        self.ExportNameLabel.setText('Export Name')
+        self.horizontalLayout_3.addWidget(self.ExportNameLabel, 0, QtCore.Qt.AlignHCenter)
+        self.ExportNameLineEdit = QtWidgets.QLineEdit(self.ExportNameFrame)
+        self.ExportNameLineEdit.setPlaceholderText('Enter Export Name ...')
+        self.horizontalLayout_3.addWidget(self.ExportNameLineEdit)
+        self.horizontalLayout_3.setStretch(0, 1)
+        self.horizontalLayout_3.setStretch(1, 2)
+        self.verticalLayout_2.addWidget(self.ExportNameFrame)
+        self.ButtonsFrame = QtWidgets.QFrame(self.frame)
+        self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.ButtonsFrame)
+        self.horizontalLayout_4.setSpacing(20)
+        self.StartButton = QtWidgets.QToolButton(self.ButtonsFrame)
+        self.StartButton.setText('Start')
+        self.StartButton.setAutoRaise(False)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        self.StartButton.setSizePolicy(sizePolicy)
+        self.horizontalLayout_4.addWidget(self.StartButton)
+        self.StopButton = QtWidgets.QToolButton(self.ButtonsFrame)
+        self.StopButton.setText('Stop')
+        self.StopButton.setAutoRaise(False)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        self.StopButton.setSizePolicy(sizePolicy)
+        self.horizontalLayout_4.addWidget(self.StopButton)
+        self.verticalLayout_2.addWidget(self.ButtonsFrame)
+        self.TreeWidgetFrame = QtWidgets.QFrame(self.frame)
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.TreeWidgetFrame)
+        self.CounterLabel = QtWidgets.QLabel(self.TreeWidgetFrame)
+        self.CounterLabel.setText('Count : 0')
+        self.treeWidget = MyQTreeWidget(self.TreeWidgetFrame,counterLabel=self.CounterLabel)
+        self.treeWidget.setColumns(['UserName','PhoneNumber','Title','LastSeen'])
+        self.verticalLayout.addWidget(self.treeWidget)
+        self.verticalLayout.addWidget(self.CounterLabel, 0, QtCore.Qt.AlignHCenter)
+        self.verticalLayout_2.addWidget(self.TreeWidgetFrame)
+        self.verticalLayout_2.setStretch(1, 1)
+        self.verticalLayout_2.setStretch(3, 5)
+        self.verticalLayout_2.setStretch(4, 20)
+        self.gridLayout.addWidget(self.frame, 0, 0, 1, 1)
+
+    def menu (self):
+        menu = MyCustomContextMenu(
+            Actions_arg=[
+                "Copy UserName", 
+                "Copy PhoneNumber", 
+                "Delete Row", 
+                "Export To Excel", 
+                "Clear Data" ,
+            ])
+        menu.multiConnect(functions=[
+            lambda: self.copy(0) ,
+            lambda: self.copy(1) ,
+            lambda: self.delete() ,
+            lambda : self.export(self.ExportNameLineEdit.text(),self.ExportRange),
+            lambda : self.treeWidget.clear()
+        ])
+        menu.show()
+
+
+    def copy(self , index:int):
+        try :
+            pyperclip.copy(self.treeWidget.currentItem().text(index))
+        except :
+            self.msg.showWarning(text="No Item Selected please Select one !")
+
+    def delete(self):
+        try:
+            self.treeWidget.takeTopLevelItem(self.treeWidget.indexOfTopLevelItem(self.treeWidget.currentItem()))
+        except:
+            self.msg.showWarning(text="No Item Selected please Select one !")
+
+    def export(self,name:typing.Optional[str],values:dict):
+        if name == '' or name == ' ':
+            name = f"Hour{datetime.now().hour}Minute{datetime.now().minute}"
+        if self.treeWidget._ROW_INDEX > 0 :
+            self.treeWidget.getCustomDataFrame(values).to_excel(f"Data/Exports/{name}[{datetime.now().date()}].xlsx",index=False)
+            self.msg.showInfo(text=f"Exported Succecfully to 'Data/Exports/{name}[{datetime.now().date()}].xlsx'")
+        else :
+            self.msg.showWarning(text="No Data In App Please Try Again Later")
+
+
+    def setExportRange(self,values:dict):
+        self.ExportRange = values
+
