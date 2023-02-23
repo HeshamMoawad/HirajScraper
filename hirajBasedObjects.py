@@ -150,7 +150,7 @@ class PostObject(object): # Completed ...
         self.Data = DataBase('Data\DataBase.db')
         self.Date = DateOperations() 
         self.DateScraping = self.Date.getCurrentDate()
-        if self.Data.Search(table=DataTableFlags.AdsData,column='id',val=self.id,indexretval= 3) != None:
+        if self.Data.Search(table=DataTableFlags.AdsData,column='id',val=self.id,indexretval= 3) == None:
             self.addToDataBase()
 
     def __str__(self) -> str:
@@ -194,7 +194,7 @@ class PostContactObject(AbstractHirajObject): # Completed ...
         super().__init__(parent, Response)
         self.contactText = Response['data']['postContact']['contactText']
         self.contactMobile = Response['data']['postContact']['contactMobile']
-        if self.Data.Search(table=DataTableFlags.ContactsData,column='contactMobile',val=self.contactMobile,indexretval= 4) != None:
+        if self.Data.Search(table=DataTableFlags.ContactsData,column='contactMobile',val=self.contactMobile,indexretval= 4) == None:
             self.addToDataBase()
 
     def addToDataBase(self):
@@ -210,7 +210,7 @@ class ProfileObject(AbstractHirajObject): # Completed
         self.type = Response['profile'][ResponseKeys.Profile.type]
         self.description = Response['profile'][ResponseKeys.Profile.description]
         self.contacts = Response['profile'][ResponseKeys.Profile.contacts]
-        if self.Data.Search(table=DataTableFlags.ProfilesData,column='id',val=self.id,indexretval=3) != None:
+        if self.Data.Search(table=DataTableFlags.ProfilesData,column='id',val=self.id,indexretval=3) == None:
             self.addToDataBase()
 
 
@@ -288,7 +288,7 @@ class CommentObject(AbstractHirajObject):
         self.deleteReason = Response['deleteReason']
         self.seqId = Response['seqId']
         self.date = Response['date']
-        if self.Data.Search(table=DataTableFlags.CommentsData,column='id',val=self.id,indexretval=3) != None:
+        if self.Data.Search(table=DataTableFlags.CommentsData,column='id',val=self.id,indexretval=3) == None:
             self.addToDataBase()
     
     def addToDataBase(self):
@@ -330,7 +330,7 @@ class UserObject(AbstractHirajObject):
         self.lastSeen = Response['data']['user']['lastSeen']
         self.lastSeenString = str(self.Date.translateTimeFromStampToDate(self.lastSeen))
         self.countFollowers = Response['data']['user']['countFollowers']
-        if self.Data.Search(table=DataTableFlags.UsersData,column='id',val=self.id,indexretval=3) != None:
+        if self.Data.Search(table=DataTableFlags.UsersData,column='id',val=self.id,indexretval=3) == None:
             self.addToDataBase()
 
     def addToDataBase(self):
@@ -443,7 +443,7 @@ class LeadObject(AbstractHirajObject):
         self.Title = parent.title
         self.PhoneNumber = BaseClass.PostContact(parent).contactMobile
         self.LastSeen = BaseClass.User(parent).lastSeenString
-        if self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1) != None and self.PhoneNumber != '':
+        if self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1) != None and self.PhoneNumber == '':
             self.addToDataBase()
 
     def addToDataBase(self):
