@@ -19,6 +19,7 @@ class Window(MyQMainWindow):
     def SetupUi(self):
         self.resize(650,550)
         # self.mainWidget.setStyleSheet(Styles().main)
+
         # Define Animated Side Menu 
         self.Menu = QSideMenuEnteredLeaved(
             parent = self.mainWidget ,
@@ -68,6 +69,22 @@ class Window(MyQMainWindow):
         self.Menu.connect_Button_Page(btn = self.SettingBtn ,pageIndex = 1)
         self.Menu.connect_Button_Page(btn = self.SheetsBtn ,pageIndex = 2)
         self.Menu.connect_Button_Page(btn = self.SimilarBtn ,pageIndex = 3)
+        # SearchThread Part 
+        self.SearchThread = SearchThread()
+        self.SearchThread.setMainClass(self)
+        self.SearchThread.msg.connect(self.msg.showInfo)
+        self.SearchThread.statues.connect(self.Menu.MainLabel.setText)
+        self.SearchThread.LeadSignal.connect(self.SearchPage.treeWidget.appendDataAsDict)
+        self.SearchPage.StartBtn.clicked.connect(self.SearchThread.start)
+        self.SearchPage.StopBtn.clicked.connect(lambda : self.SearchThread.kill(msg='Stopped Search Succecfully'))
+        # SimilarThread Part 
+        self.SimilarThread = SimilarThread()
+        self.SimilarThread.setMainClass(self)
+        self.SimilarThread.msg.connect(self.msg.showInfo)
+        self.SimilarThread.statues.connect(self.Menu.MainLabel.setText)
+        self.SimilarThread.LeadSignal.connect(self.SimilarPage.treeWidget.appendDataAsDict)
+        self.SimilarPage.StartButton.clicked.connect(self.SimilarThread.start)
+        self.SimilarPage.StopButton.clicked.connect( lambda :self.SimilarThread.kill(msg='Stopped Similar Search Succecfully') )
 
 
         return super().SetupUi()
@@ -76,33 +93,53 @@ class Window(MyQMainWindow):
 
 class SearchThread(MyThread):
     LeadSignal = pyqtSignal(dict)
-
+    status = pyqtSignal(str)
 
     def setMainClass(self,window:Window):
         self.MainClass = window
 
     def run(self) -> None:
 
-        # Block Of Code
-        tag = self.MainClass.SettingPage.SubCategoryCombobox.currentText() if self.MainClass.SettingPage.SubCategoryCombobox.currentIndex() != 0 else self.MainClass.SettingPage.CategoryCombobox.currentText()
-        city = [self.MainClass.SettingPage.CityCombobox.currentText()] if self.MainClass.SettingPage.CityCombobox.currentIndex() != 0 else []
+        self.statues.emit('Starting')
+        category = self.MainClass.SettingPage.CategoryCombobox.currentText()
+        subcategory = self.MainClass.SettingPage.SubCategoryCombobox.currentText()
+        tag = category if subcategory == '' else subcategory
+        city = [self.MainClass.SettingPage.CityCombobox.currentText()] if self.MainClass.SettingPage.CityCombobox.currentText() != '' else []
         key = self.MainClass.SettingPage.KeyWordLineEdit.text()
         keyword = key if key != '' and key != ' ' else ''
         hiraj = Hiraj()
         hiraj.LeadSignal.connect(self.LeadSignal.emit)
         hiraj.msg.connect(self.msg.emit)
-        args = {
-                RequestKeys.Search.tag: tag ,
-                RequestKeys.Search.cities:city ,
-                RequestKeys.Search.search:keyword ,
-            }
-        print(args)
-        # hiraj.Search(
-        #     limitPage = self.MainClass.SettingPage.LimitSpinbox.value() ,
-        #     comments = hiraj.HirajBase.Flags.Yes if self.MainClass.SettingPage.CommentsToggle.isChecked() else hiraj.HirajBase.Flags.No
-        #     **args
-        #     )
+        hiraj.Search(
+            limitPage = self.MainClass.SettingPage.LimitSpinbox.value() ,
+            comments = hiraj.HirajBase.Flags.Yes if self.MainClass.SettingPage.CommentsToggle.isChecked() else hiraj.HirajBase.Flags.No ,
+            **{
+                RequestKeys.Search.tag : tag ,
+                RequestKeys.Search.cities : city ,
+                RequestKeys.Search.search : keyword ,
+            })
 
+        self.statues.emit('Ending good luck ^_^')
+
+
+
+class SimilarThread(MyThread):
+    LeadSignal = pyqtSignal(dict)
+    status = pyqtSignal(str)
+
+    def setMainClass(self,window:Window):
+        self.MainClass = window
+
+    def run(self) -> None:
+        self.statues.emit('Starting')
+        hiraj = Hiraj()
+        hiraj.msg.connect(self.msg.emit)
+        hiraj.LeadSignal.connect(self.LeadSignal.emit)
+        hiraj.Similar(
+            self.MainClass.SimilarPage.plainTextEdit.toPlainText().splitlines(),
+            comments = hiraj.HirajBase.Flags.Yes if self.MainClass.SettingPage.CommentsToggle.isChecked() else hiraj.HirajBase.Flags.No
+            )
+        self.statues.emit('Ending good luck ^_^')
 
 
         
