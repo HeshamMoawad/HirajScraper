@@ -20,6 +20,7 @@ class Hiraj(QObject):
 
     LeadSignal = pyqtSignal(dict)
     msg = pyqtSignal(str)
+    
 
     def __init__(
         self ,
@@ -37,6 +38,7 @@ class Hiraj(QObject):
             kwargs[RequestKeys.Search.page] = page
             PostsObj = self.HirajBase.Search(**kwargs)
             for post in PostsObj.Posts :
+                print(post.id)
                 Lead = LeadObject(post,BaseClass=self.HirajBase)
                 if Lead.PhoneNumber != '' :
                     self.LeadSignal.emit(Lead.dictOfObject)
@@ -68,7 +70,7 @@ class Hiraj(QObject):
                     if Lead.PhoneNumber != '' :
                         self.LeadSignal.emit(Lead.dictOfObject)
                         print(Lead.dictOfObject)
-                    
+                      
 
 # h = Hiraj()
 # h.Search(limitPage=2,**{
