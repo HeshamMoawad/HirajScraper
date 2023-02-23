@@ -700,7 +700,7 @@ class DataBase():
         try:
             return self.cur.fetchall()[0][indexretval]
         except Exception as e :
-            print(e)
+            # print(f'\nError In Search -> {e}-')
             return None
         
 
