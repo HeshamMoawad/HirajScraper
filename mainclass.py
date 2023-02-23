@@ -113,6 +113,12 @@ class ResponseKeys():
         lastSeen= "lastSeen"
         countFollowers= "countFollowers"
 
+class DataTableFlags():
+    AdsData = 'AdsData'
+    CommentsData = 'CommentsData'
+    ContactsData = 'ContactsData'
+    ProfilesData = 'ProfilesData'
+    UsersData = 'UsersData'
 
 
 
@@ -129,12 +135,6 @@ class HirajBase(QObject):
         Yes = 'Yes'
         No = 'No'
 
-    class DataTableFlags():
-        AdsData = 'AdsData'
-        CommentsData = 'CommentsData'
-        ContactsData = 'ContactsData'
-        ProfilesData = 'ProfilesData'
-        UsersData = 'UsersData'
 
     class URLs():
         First = 'https://graphql.haraj.com.sa/' # ALL
@@ -480,7 +480,9 @@ class PostObject(object): # Completed ...
         # self.downRank = Post[ResponseKeys.Search]
         self.MethodType = Post['MethodType'] if 'MethodType' in Post.keys() else 'None' 
         self.similarPostID = Post['similarPostID'] if 'similarPostID' in Post.keys() else 0
-        
+        self.Data = DataBase('Data\DataBase.db')
+        self.Date = DateOperations() 
+
 
     def __str__(self) -> str:
         return str(self.__dict__)
@@ -489,34 +491,81 @@ class PostObject(object): # Completed ...
     def dictOfObject(self)->dict:
         return self.__dict__
 
+    def addToDataBase(self,table:DataTableFlags):
+        self.DateScraping = self.Date.getCurrentDate()
+        # if table == DataTableFlags.AdsData:
+        #     response[ResponseKeys.AdInfo.imagesList] = "".join([f"{x}\n" for x in response[self.ResponseKeys.AdInfo.imagesList] ])
+        #     response[ResponseKeys.AdInfo.tags] = "".join([f"{x}\n" for x in response[self.ResponseKeys.AdInfo.tags] ])
+        self.Data.addToDataAsDict(
+            table = table,
+            **self.dictOfObject
+        )
 
-class PostContactObject(object): # Completed ...
-    def __init__(self,contactdict:dict) -> None:
-        self.contactText = contactdict[ResponseKeys.postContact.contactText]
-        self.contactMobile = contactdict[ResponseKeys.postContact.contactMobile]
-    
-    @property
-    def dictOfObject(self)->dict:
-        return {'postContact':self.__dict__}
+
+class AbstractHirajObject(object):
+    def __init__(self,parent:PostObject,Response:dict) -> None:
+        self.Response = Response
+        self.AdID = parent.id
+        self.AdCreatorID = parent.authorId
+        self.AdCreatorUsername = parent.authorUsername
+        self.Data = DataBase('Data\DataBase.db')
+        self.Date = DateOperations() 
 
     def __str__(self) -> str:
         return str(self.dictOfObject)
+        
+    @property
+    def dictOfObject(self)->dict:
+        return self.__dict__
+
+    def addToDataBase(self,table:DataTableFlags):
+        self.DateScraping = self.Date.getCurrentDate()
+        # if table == DataTableFlags.AdsData:
+        #     response[ResponseKeys.AdInfo.imagesList] = "".join([f"{x}\n" for x in response[self.ResponseKeys.AdInfo.imagesList] ])
+        #     response[ResponseKeys.AdInfo.tags] = "".join([f"{x}\n" for x in response[self.ResponseKeys.AdInfo.tags] ])
+        self.Data.addToDataAsDict(
+            table = table,
+            **self.dictOfObject
+        )
+        
+
+class PostContactObject(AbstractHirajObject): # Completed ...
+    def __init__(self, parent: PostObject, Response: dict) -> None:
+        super().__init__(parent, Response)
+        self.contactText = Response[ResponseKeys.postContact.contactText]
+        self.contactMobile = Response[ResponseKeys.postContact.contactMobile]
+
+    def addToDataBase(self):
+        return super().addToDataBase(DataTableFlags.ContactsData)
 
 
-class ProfileObject(object):# Not Completed
-    pass
 
-class ResponseObject(object):# Not Completed
+class ProfileObject(AbstractHirajObject): # Not Completed
+    def __init__(self, parent: PostObject, Response: dict) -> None:
+        super().__init__(parent, Response)
+        self.id = Response['profile']['id']
+        self.handler = Response['profile'][ResponseKeys.Profile.handler]
+        self.type = Response['profile'][ResponseKeys.Profile.type]
+        self.description = Response['profile'][ResponseKeys.Profile.description]
+        self.contacts = Response['profile'][ResponseKeys.Profile.contacts]
+
+    def addToDataBase(self):
+        return super().addToDataBase(DataTableFlags.ProfilesData)
+        
+
+
+class PostsResponseObject(AbstractHirajObject):# Not Completed
 
     def __init__(self,response:dict) -> None:
         self.Response = response
+        self.hasNextPage = False
         if 'search' in response['data'].keys() :
             self.Type = PayloadQueryTypeFlags.Search #'Search'
             self.hasNextPage = response['data']['pageInfo']['hasNextPage']
 
         elif 'similarPosts' in response['data'].keys() :
             self.Type = PayloadQueryTypeFlags.SimilarPosts
-            self.hasNextPage = False
+            # self.hasNextPage = False
 
         elif 'posts' in response['data'].keys() :
             self.Type = PayloadQueryTypeFlags.FetchAds
@@ -524,7 +573,7 @@ class ResponseObject(object):# Not Completed
         
         elif 'postContact' in response['data'].keys():
             self.Type = PayloadQueryTypeFlags.PostContact
-            self.hasNextPage = False
+            # self.hasNextPage = False
         
         elif 'comments' in response['data'].keys():
             self.Type = PayloadQueryTypeFlags.Comments
@@ -532,12 +581,11 @@ class ResponseObject(object):# Not Completed
 
         elif 'profile' in response['data'].keys():
             self.Type = PayloadQueryTypeFlags.Profile
-            self.hasNextPage =  False
+            # self.hasNextPage =  False
 
         elif 'user' in response['data'].keys():
             self.Type = PayloadQueryTypeFlags.User
-            self.hasNextPage =  False
-
+            # self.hasNextPage =  False
 
     @property
     def Posts(self)-> typing.List[PostObject]:
@@ -560,9 +608,6 @@ class ResponseObject(object):# Not Completed
         return Posts
 
     
-    @property
-    def PostContact(self):
-        pass
 
 
 
