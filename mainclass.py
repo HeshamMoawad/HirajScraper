@@ -8,10 +8,7 @@ from hirajBasedObjects import (
 
 from Packages import  (
     QObject,
-    pyqtSignal ,
-    )
-
-
+    pyqtSignal )
 
 
 class Hiraj(QObject):
@@ -34,15 +31,18 @@ class Hiraj(QObject):
         self.FastLevel = FastLevel
         
 
-    def Search(self,comments:HirajBase.Flags= HirajBase.Flags.No,**kwargs):
-        PostsObj = self.HirajBase.Search(**kwargs)
-        for post in PostsObj.Posts :
-            Lead = LeadObject(post,BaseClass=self.HirajBase)
-            if Lead.PhoneNumber != '' :
-                self.LeadSignal.emit(Lead.dictOfObject)
-                print(Lead.dictOfObject)
-            if comments == HirajBase.Flags.Yes :
-                self.Comments(post)
+    def Search(self,limitPage:int=None,comments:HirajBase.Flags= HirajBase.Flags.No,**kwargs):
+        endrange = limitPage if limitPage != None else 200
+        for page in range(1,endrange):
+            kwargs[RequestKeys.Search.page] = page
+            PostsObj = self.HirajBase.Search(**kwargs)
+            for post in PostsObj.Posts :
+                Lead = LeadObject(post,BaseClass=self.HirajBase)
+                if Lead.PhoneNumber != '' :
+                    self.LeadSignal.emit(Lead.dictOfObject)
+                    print(Lead.dictOfObject)
+                if comments == HirajBase.Flags.Yes :
+                    self.Comments(post)
 
 
     
@@ -70,30 +70,11 @@ class Hiraj(QObject):
                         print(Lead.dictOfObject)
                     
 
-
-
-            
-        
-
-
-
-h = Hiraj()
-
-# h.Similar(['598994886'])
-
-h.Search(**{
-        RequestKeys.Search.tag:"مستلزمات شخصية",
-        RequestKeys.Search.cities:[
-                "الرياض"
-            ],
-        RequestKeys.Search.search:"ساعة"
-    })
-
-# h.PostContact(109876295)
-
-
-
-
-
-
-
+# h = Hiraj()
+# h.Search(limitPage=2,**{
+#         RequestKeys.Search.tag:"مستلزمات شخصية",
+#         RequestKeys.Search.cities:[
+#                 "الرياض"
+#             ],
+#         RequestKeys.Search.search:"ساعة"
+#     })
