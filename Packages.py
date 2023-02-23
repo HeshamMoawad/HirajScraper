@@ -744,7 +744,7 @@ class DataBase():
             VALUES {tuple([(kwargs[column] if kwargs[column] != None else 'NULL') for column in columns ])} ; 
             """)
             self.con.commit()
-            print(t)
+            # print(t)
         except Exception as e:
             print(f"\n{e} \nError in Database \n")
             print(t)
