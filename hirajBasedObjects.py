@@ -151,6 +151,8 @@ class PostObject(object): # Completed ...
         self.Data = DataBase('Data\DataBase.db')
         self.Date = DateOperations() 
         self.DateScraping = self.Date.getCurrentDate()
+        if self.Data.Search(table=DataTableFlags.AdsData,column='id',val=self.id,indexretval= 3) != None:
+            self.addToDataBase()
 
     def __str__(self) -> str:
         return str(self.__dict__)
@@ -181,10 +183,7 @@ class AbstractHirajObject(object):
         return self.__dict__
 
     def addToDataBase(self,table:DataTableFlags):
-        self.DateScraping = self.Date.getCurrentDate()
-        # if table == DataTableFlags.AdsData:
-        #     response[ResponseKeys.AdInfo.imagesList] = "".join([f"{x}\n" for x in response[self.ResponseKeys.AdInfo.imagesList] ])
-        #     response[ResponseKeys.AdInfo.tags] = "".join([f"{x}\n" for x in response[self.ResponseKeys.AdInfo.tags] ])
+        self.DateScraping = self.Date.getCurrentDate(DateOperations.TimeFlags.Epoch)
         self.Data.addToDataAsDict(
             table = table,
             **self.dictOfObject
@@ -194,11 +193,14 @@ class AbstractHirajObject(object):
 class PostContactObject(AbstractHirajObject): # Completed ...
     def __init__(self, parent: PostObject, Response: dict) -> None:
         super().__init__(parent, Response)
-        self.contactText = Response[ResponseKeys.postContact.contactText]
-        self.contactMobile = Response[ResponseKeys.postContact.contactMobile]
+        self.contactText = Response['data']['postContact']['contactText']
+        self.contactMobile = Response['data']['postContact']['contactMobile']
+        if self.Data.Search(table=DataTableFlags.ContactsData,column='contactMobile',val=self.contactMobile,indexretval= 4) != None:
+            self.addToDataBase()
 
     def addToDataBase(self):
         return super().addToDataBase(DataTableFlags.ContactsData)
+
 
 
 class ProfileObject(AbstractHirajObject): # Completed
@@ -209,6 +211,9 @@ class ProfileObject(AbstractHirajObject): # Completed
         self.type = Response['profile'][ResponseKeys.Profile.type]
         self.description = Response['profile'][ResponseKeys.Profile.description]
         self.contacts = Response['profile'][ResponseKeys.Profile.contacts]
+        if self.Data.Search(table=DataTableFlags.ProfilesData,column='id',val=self.id,indexretval=3) != None:
+            self.addToDataBase()
+
 
     def addToDataBase(self):
         return super().addToDataBase(DataTableFlags.ProfilesData)
@@ -221,7 +226,7 @@ class PostsResponseObject(AbstractHirajObject):# Completed
         self.hasNextPage = False
         if 'search' in response['data'].keys() :
             self.Type = PayloadQueryTypeFlags.Search #'Search'
-            self.hasNextPage = response['data']['pageInfo']['hasNextPage']
+            self.hasNextPage = response['data']['search']['pageInfo']['hasNextPage']
 
         elif 'similarPosts' in response['data'].keys() :
             self.Type = PayloadQueryTypeFlags.SimilarPosts
@@ -284,6 +289,8 @@ class CommentObject(AbstractHirajObject):
         self.deleteReason = Response['deleteReason']
         self.seqId = Response['seqId']
         self.date = Response['date']
+        if self.Data.Search(table=DataTableFlags.CommentsData,column='id',val=self.id,indexretval=3) != None:
+            self.addToDataBase()
     
     def addToDataBase(self):
         return super().addToDataBase(DataTableFlags.CommentsData)
@@ -324,12 +331,12 @@ class UserObject(AbstractHirajObject):
         self.lastSeen = Response['data']['user']['lastSeen']
         self.lastSeenString = str(self.Date.translateTimeFromStampToDate(self.lastSeen))
         self.countFollowers = Response['data']['user']['countFollowers']
-        
+        if self.Data.Search(table=DataTableFlags.UsersData,column='id',val=self.id,indexretval=3) != None:
+            self.addToDataBase()
+
     def addToDataBase(self):
         return super().addToDataBase(DataTableFlags.UsersData)
         
-        
-
 
 class HirajBase(QObject):
     msg = pyqtSignal(str)
@@ -389,7 +396,7 @@ class HirajBase(QObject):
         ClientID :Flags = Flags.Normal ,
         **kwargs
         ) -> dict:
-        url = self.URLs.Secound if RequestType == self.PayloadQueryTypeFlags.Profile else self.URLs.First
+        url = self.URLs.Secound if RequestType == PayloadQueryTypeFlags.Profile else self.URLs.First
         Payload = self.Payloads[RequestType]
         for key,value in kwargs.items():
             Payload['variables'][key] = value
@@ -435,11 +442,11 @@ class LeadObject(AbstractHirajObject):
         super().__init__(parent,Response={})
         self.UserName = parent.authorUsername
         self.Title = parent.title
-        self.PhoneNumber = BaseClass.PostContact(parent)
+        self.PhoneNumber = BaseClass.PostContact(parent).contactMobile
         self.LastSeen = BaseClass.User(parent).lastSeenString
+        if self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1) != None:
+            self.addToDataBase()
 
     def addToDataBase(self):
         return super().addToDataBase(DataTableFlags.Leads)
     
-
-
