@@ -28,8 +28,6 @@ from bs4 import BeautifulSoup
 
 
 
-
-
 ####################################################
 
 # MIT License
@@ -325,7 +323,6 @@ class AnimatedToggle(QCheckBox):
         self.update()
 
 
-
 class QSideMenuNewStyle(QWidget):
     def __init__(
             self,
@@ -511,9 +508,6 @@ class QSideMenuNewStyle(QWidget):
             self.MAXWIDTH = Fixedwidth + 150 if Fixedwidth is int else 200
 
 
-
-
-
 class MyQFrame(QFrame):
     Enterd = pyqtSignal()
     Leaved = pyqtSignal()
@@ -597,9 +591,6 @@ class MyCustomContextMenu(QObject):
         cur = QCursor()
         self.Menu.exec_(cur.pos())
 
-
-
-
 ## ------------ QMainWindow custom widget
 class MyQMainWindow(QMainWindow):
     App = QApplication(sys.argv)
@@ -646,7 +637,6 @@ class MyQMainWindow(QMainWindow):
         self.App.setWindowIcon(app_icon)
     
 ## ---------------------- Validation some texts 
-
 class Validation(object):
     class Numbers(object):
         def __init__(self,phone:str) -> None:
@@ -687,10 +677,7 @@ class Validation(object):
             elif "https://t.me/"in text :
                 return text.replace("https://t.me/","@")
 
-
-
 ## ---------------------- Used For some simple Batabase Actions 
-
 class DataBase():
     def __init__(self,relativepath:str = "Data\Database.db") -> None:
         self.con = sqlite3.connect(relativepath)
@@ -813,9 +800,7 @@ class JavaScriptCodeHandler(object):
                 pass
         return result
 
-    
 ##----------------- Base Class to start webdriver , scraping with some Options 
-
 class BaseScrapingClassQt5(QObject):
     LeadSignal = pyqtSignal(list)
     PersntageSignal = pyqtSignal(int)
@@ -861,7 +846,6 @@ class BaseScrapingClassQt5(QObject):
     def NormalScroll(self):
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-########################################################################
 
 class MyQToolButton(QToolButton):
     Enterd = pyqtSignal()
@@ -918,10 +902,6 @@ class MyQToolButton(QToolButton):
         stylesheet = self.styleSheet() + style
         self.setStyleSheet(stylesheet)
 
-
-
-
-##################################################################################
 
 class QSideMenuEnteredLeaved(QWidget):
 
@@ -1126,8 +1106,6 @@ class QSideMenuEnteredLeaved(QWidget):
     def connect_Button_Page(self,btn:MyQToolButton,pageIndex:int):
         btn.clicked.connect(lambda : self.setCurrentPage(pageIndex))
         
-
-
 ## ------------- Custom Thread class
 class MyThread(QThread):
 
@@ -1153,7 +1131,7 @@ class MyThread(QThread):
         else:
             return super().start(priority)
 
-###################################################
+
 class DateOperations(object):
         
 
@@ -1185,6 +1163,7 @@ class DateOperations(object):
             return str(self.translateTimeFromStampToDate(time.time()).date())
         elif flag == self.TimeFlags.TimeOnly:
             return str(self.translateTimeFromStampToDate(time.time()).time())
+
 
 class Generator():
     lista = [str(x) for x in range(10)]
@@ -2281,8 +2260,4 @@ class ProxyFilterAPI(object): # From  https://free-proxy-list.net/
         else :
             return self.ProxiesList[random.randint(0,len(self.ProxiesList)-1)]
             
-
-
-
-
 
