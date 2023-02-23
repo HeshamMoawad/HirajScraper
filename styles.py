@@ -32,11 +32,10 @@
 
 class Styles():
 
-    
 
     @property
-    def main(self):
-        return self.Widget.Normal +self.Label.Normal+ self.LineEdit.Normal + self.ComboBox.Normal + self.SpinBox.Normal + self.PushButton.Normal + self.GroupBox.Normal + self.Frame.Normal
+    def main(self)->str:
+        return self.Widget.Normal + self.Label.Normal+ self.LineEdit.Normal + self.ComboBox.Normal + self.SpinBox.Normal + self.PushButton.Normal + self.GroupBox.Normal + self.Frame.Normal
 
     class Colors():
         Orange = "rgb(255, 112, 16)"
@@ -58,7 +57,6 @@ class Styles():
             border-radius:4px;
             background-color:white;
             color:black;
-            
         }
         """
 
@@ -73,7 +71,7 @@ class Styles():
         QWidget{
             font:14px;
             color:white;
-            background-color:qlineargradient(spread:pad, x1:0.977273, y1:0.755, x2:0, y2:0.365, stop:0 rgba(7, 6, 5, 210), stop:1 rgba(124, 14, 122, 228));
+            background-color: qlineargradient(spread:pad, x1:0.988636, y1:0.762, x2:0.131, y2:0.500227, stop:0 rgba(38, 31, 29, 210), stop:1 rgba(7, 107, 230, 217));
         }
         """
     class ComboBox():
@@ -151,18 +149,3 @@ class Styles():
         """
 
 
-
-
-
-
-
-
-
-
-
-    Button = """
-    MyQToolButton{
-        background-color:transparent;
-        border-radius:6px;
-    };
-    """
