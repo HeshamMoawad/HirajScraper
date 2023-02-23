@@ -20,7 +20,7 @@ class Search(QObject):
     def __init__(self, parent):
         super().__init__()
         # ['UserName','PhoneNumber','Title','LastSeen']
-        self.ExportRange = {'UserName':0,'Title':1,'PhoneNumber':2,'LastSeen':3 }
+        self.ExportRange = {'UserName':0,'PhoneNumber':1,'Title':2,'LastSeen':3 }
         self.gridLayout = QtWidgets.QGridLayout(parent)
         self.MainFrame = QtWidgets.QFrame(parent)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.MainFrame)
@@ -128,7 +128,7 @@ class Search(QObject):
 class Setting(QObject):
     CATEGORIES = ['كل الحراج','حراج السيارات', 'حراج العقار', 'حراج الأجهزة', 'مواشي وحيوانات وطيور', 'اثاث', 'مستلزمات شخصية', 'خدمات', 'وظائف', 'اطعمة ومشروبات', 'برمجة وتصاميم', 'مكتبة وفنون', 'صيد ورحلات']
     SUBCATEGORY = [['', 'هونشي', 'زوتي', 'ماهيندرا', 'ساوايست', 'تسلا', 'بايك', 'جاك JAC', 'ماكلارين', 'ماكسيس', 'ليفان', 'فيكتوري اوتو', 'فوتون', 'سي ام سي', 'جيتور', 'جى ام سي JMC', 'تاتا', 'الفا روميو', 'BYD', 'فاو FAW', 'جريت وول Great Wall', 'جي ايه سي GAC', 'هافال', 'بروتون', 'استون مارتن', 'سانج يونج', 'فيات', 'ساب', 'دايو', 'سيات', 'تشيري', 'سيتروين', 'فيراري', 'سكودا', 'اوبل', 'لامبورجيني', 'رولز رويس', 'مازيراتي', 'بيوك', ' رينو', 'شانجان', 'ZXAUTO', 'MG', 'سوبارو', 'جاكوار', 'بنتلي', 'بيجو', 'فولفو', 'ميركوري', 'جيلي', 'ديهاتسو', 'فولكس واجن', 'لنكولن', 'همر', 'انفنيتي', 'سوزوكي', 'اودي', 'بورش', 'كاديلاك', 'ايسوزو', 'لاند روفر', 'مازدا', 'ميتسوبيشي', 'جيب','كرايزلر', 'دودج', 'كيا', 'دبابات', 'بي ام دبليو', 'هوندا', 'مرسيدس', 'شاحنات ومعدات ثقيلة', 'جي ام سي', 'لكزس', 'جنسس', 'هونداي', 'نيسان', 'قطع غيار وملحقات', 'شيفروليه', 'فورد', 'تويوتا'], ['', 'بيوت للايجار', 'ادوار للايجار', 'مزارع للبيع', 'فلل للايجار', 'استراحات للبيع', 'عماره للايجار', 'محلات للايجار', 'محلات للتقبيل', 'استراحات للايجار', 'عمارة للبيع', 'اراضي تجارية للبيع', 'بيوت للبيع', 'شقق للبيع', 'فلل للبيع', 'شقق للايجار', 'اراضي للبيع'], ['', 'غسالة سامسونج', 'ثلاجة سامسونج', 'اجهزة غير مصنفة', 'هيتاشي Hitachi', 'باناسونيك Panasonic', 'مايكروسوفت Microsoft', 'ال جي LG', 'أرقام مميزة', 'حسابات واشتراكات', 'كاميرات تصوير', 'تلفزيونات وصوتيات', 'ألعاب إلكترونية', 'أجهزة كمبيوتر', 'أجهزة تابلت', 'جوالات'], ['', 'وبر', 'هامستر', 'سناجب', 'بط', 'ارانب', 'أسماك وسلاحف', 'بقر', 'كلاب', 'خيل', 'أبل', 'دجاج', 'قطط', 'حمام', 'ببغاء', 'ماعز', 'غنم'], ['', 'مجالس ومفروشات', 'طاولات وكراسي', 'خزائن ودواليب', 'تحف وديكور', 'أسرة ومراتب', 'أدوات منزلية', 'أثاث مكتبي', 'أثاث خارجي'], ['', 'ملابس أطفال', 'ملابس نسائية', 'ملابس رجالية', 'نظارات', 'مستلزمات رياضية', 'عطورات', 'ساعات'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات','زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفر وسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['', 'مفقودات', 'قسم غير مصنف', 'سفروسياحة', 'حفلات ومناسبات', 'زراعة وحدائق', 'العاب وترفيه'], ['']]
-    AREAS = ["كل المناطق","الرياض","الشرقيه","جده","مكه","ينبع","حفر الباطن","المدينة","الطايف","تبوك","القصيم","حائل","أبها","عسير","الباحة","جيزان","نجران","الجوف","عرعر","الكويت","الإمارات","البحرين"]
+    AREAS = ["","الرياض","الشرقيه","جده","مكه","ينبع","حفر الباطن","المدينة","الطايف","تبوك","القصيم","حائل","أبها","عسير","الباحة","جيزان","نجران","الجوف","عرعر","الكويت","الإمارات","البحرين"]
     msg = MyMessageBox()
     ExportRangeSignal = pyqtSignal(dict)
     def __init__(self, parent):
@@ -161,7 +161,7 @@ class Setting(QObject):
         self.LimitFrame = QtWidgets.QFrame(self.keywordLimitMainFrame)
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.LimitFrame)
         self.LimitLabel = QtWidgets.QLabel(self.LimitFrame)
-        self.LimitLabel.setText('Limit')
+        self.LimitLabel.setText('Limit Pages')
         self.horizontalLayout.addWidget(self.LimitLabel, 0, QtCore.Qt.AlignHCenter)
         self.LimitSpinbox = QtWidgets.QSpinBox(self.LimitFrame)
         self.LimitSpinbox.setMinimum(1)
@@ -206,6 +206,7 @@ class Setting(QObject):
         self.CityLabel.setText('City')
         self.horizontalLayout_7.addWidget(self.CityLabel, 0, QtCore.Qt.AlignHCenter)
         self.CityCombobox = QtWidgets.QComboBox(self.CityFrame)
+        self.CityCombobox.addItems(self.AREAS)
         self.horizontalLayout_7.addWidget(self.CityCombobox)
         self.horizontalLayout_9.addWidget(self.CityFrame)
         self.CommentsFrame = QtWidgets.QFrame(self.CityCommentMainFrame)
@@ -231,6 +232,7 @@ class Setting(QObject):
         self.horizontalLayout_10.addWidget(self.UserNameLabel, 0, QtCore.Qt.AlignHCenter)
         self.UserNameToggle = AnimatedToggle(self.UserNameFrame)
         self.UserNameToggle.setSizePolicy(sizePolicy)
+        self.UserNameToggle.setChecked(True)
         self.horizontalLayout_10.addWidget(self.UserNameToggle)
         self.horizontalLayout_15.addWidget(self.UserNameFrame)
         self.PhoneNumberFrame = QtWidgets.QFrame(self.UserPhoneMainFrame)
@@ -240,6 +242,7 @@ class Setting(QObject):
         self.horizontalLayout_11.addWidget(self.PhoneNumberLabel, 0, QtCore.Qt.AlignHCenter)
         self.PhoneNumberToggle = AnimatedToggle(self.PhoneNumberFrame)
         self.PhoneNumberToggle.setSizePolicy(sizePolicy)
+        self.PhoneNumberToggle.setChecked(True)
         self.horizontalLayout_11.addWidget(self.PhoneNumberToggle)
         self.horizontalLayout_15.addWidget(self.PhoneNumberFrame)
         self.verticalLayout.addWidget(self.UserPhoneMainFrame)
@@ -252,6 +255,7 @@ class Setting(QObject):
         self.horizontalLayout_12.addWidget(self.TitleLabel, 0, QtCore.Qt.AlignHCenter)
         self.TitleToggle = AnimatedToggle(self.TitleFrame)
         self.TitleToggle.setSizePolicy(sizePolicy)
+        self.TitleToggle.setChecked(True)
         self.horizontalLayout_12.addWidget(self.TitleToggle)
         self.horizontalLayout_14.addWidget(self.TitleFrame)
         self.LastSeenFrame = QtWidgets.QFrame(self.TitleLastMainFrame)
@@ -261,6 +265,7 @@ class Setting(QObject):
         self.horizontalLayout_13.addWidget(self.LastSeenLabel, 0, QtCore.Qt.AlignHCenter)
         self.LastSeenToggle = AnimatedToggle(self.LastSeenFrame)
         self.LastSeenToggle.setSizePolicy(sizePolicy)
+        self.LastSeenToggle.setChecked(True)
         self.horizontalLayout_13.addWidget(self.LastSeenToggle)
         self.horizontalLayout_14.addWidget(self.LastSeenFrame)
         self.verticalLayout.addWidget(self.TitleLastMainFrame)
@@ -286,8 +291,8 @@ class Setting(QObject):
         # ['UserName','Title','PhoneNumber','LastSeen']
         result = {}
         result['UserName'] = 0 if self.UserNameToggle.isChecked() else None
-        result['Title'] = 1  if self.TitleToggle.isChecked() else None
-        result['PhoneNumber'] = 2 if self.PhoneNumberToggle.isChecked() else None
+        result['PhoneNumber'] = 1 if self.PhoneNumberToggle.isChecked() else None
+        result['Title'] = 2  if self.TitleToggle.isChecked() else None
         result['LastSeen'] = 3  if self.LastSeenToggle.isChecked() else None
         self.ExportRangeSignal.emit(result)
 
@@ -340,13 +345,16 @@ class Sheets(QObject):
         files = [file for file in os.listdir("Data\Exports") if ".xlsx" in file]
         self.treeWidget.clear()
         for file in files:
-            wb = openpyxl.load_workbook(f"Data\Exports\{file}")#, use_iterators=True
-            sheet = wb.worksheets[0]
-            row_count = sheet.max_row
-            self.treeWidget.appendData(
-                items = [file,str(row_count-1)] ,
-                Icon = "Data\Icons\icons8-export-excel-100.png" ,
-            )
+            try:
+                wb = openpyxl.load_workbook(f"Data\Exports\{file}")#, use_iterators=True
+                sheet = wb.worksheets[0]
+                row_count = sheet.max_row
+                self.treeWidget.appendDataAsList(
+                    items = [file,str(row_count-1)] ,
+                    Icon = "Data\Icons\icons8-export-excel-100.png" ,
+                )
+            except Exception as e :
+                self.msg.showCritical("Can't Open Sheets\nPlease Make Sure you are Closed All Sheet in Directory")
         self.label_2.setText(f"NumbersCount : {self.totalNumbers()}")
 
     def Menu(self):
@@ -367,7 +375,11 @@ class Sheets(QObject):
 
     def copyNumbersFromExcel(self):
         file = self.treeWidget.currentItem().text(0)
-        df = pandas.read_excel(f"Data\Exports\{file}")
+        wb = openpyxl.load_workbook(f"Data\Exports\{file}")
+        ws = wb['Sheet1']
+        df = pandas.DataFrame(ws.values)
+        df.dropna(inplace=True)
+        df = df[1:]
         try:
             pyperclip.copy(df["Phone number"].to_string(index=False)) 
         except:
@@ -377,9 +389,13 @@ class Sheets(QObject):
         result = ""
         for sheet in range(self.treeWidget._ROW_INDEX):
             file = self.treeWidget.topLevelItem(sheet).text(0)
-            df = pandas.read_excel(f"Data\Exports\{file}")
+            wb = openpyxl.load_workbook(f"Data\Exports\{file}")
+            ws = wb['Sheet1']
+            df = pandas.DataFrame(ws.values)
+            df.dropna(inplace=True)
+            df = df[1:]
             try:
-                string = df["Phone number"].to_string(index=False)#index=False
+                string = df[1].to_string(index=False)#index=False
             except KeyError:
                 try:
                     string = df[df.columns[1]].to_string(index=False)#
