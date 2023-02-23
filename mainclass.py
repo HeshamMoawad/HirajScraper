@@ -313,9 +313,24 @@ class CommentsObject(AbstractHirajObject):
         pass
 
 
-
-
-
+class UserObject(AbstractHirajObject):
+    def __init__(self, parent: PostObject, Response: dict) -> None:
+        super().__init__(parent, Response)
+        self.id = Response['data']['user']['id']
+        self.username = Response['data']['user']['username']
+        self.registrationDate = Response['data']['user']['registrationDate']
+        self.mobile = Response['data']['user']['mobile']
+        self.isMember = Response['data']['user']['isMember']
+        self.isAdmin = Response['data']['user']['isAdmin']
+        self.isBlocked = Response['data']['user']['isBlocked']
+        self.isBlocked = Response['data']['user']['isBlocked']
+        self.lastSeen = Response['data']['user']['lastSeen']
+        self.countFollowers = Response['data']['user']['countFollowers']
+        
+    def addToDataBase(self):
+        return super().addToDataBase(DataTableFlags.UsersData)
+        
+        
 
 
 
@@ -409,7 +424,7 @@ class HirajBase(QObject):
         return PostContactObject(
             parent ,
             self.sendRequest(
-                RequestType = self.PayloadQueryTypeFlags.PostContact ,
+                RequestType = PayloadQueryTypeFlags.PostContact ,
                 UserAgent = self.Flags.Random ,
                 ClientID = self.Flags.Random ,
                 **{RequestKeys.postContact.postId:PostID})
