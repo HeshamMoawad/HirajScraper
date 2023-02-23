@@ -6,8 +6,7 @@ from Packages import  (
     pyqtSignal ,
     DateOperations ,
     Generator , 
-    typing
-    )
+    typing)
 
 
 class PayloadQueryTypeFlags():
@@ -444,7 +443,7 @@ class LeadObject(AbstractHirajObject):
         self.Title = parent.title
         self.PhoneNumber = BaseClass.PostContact(parent).contactMobile
         self.LastSeen = BaseClass.User(parent).lastSeenString
-        if self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1) != None:
+        if self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1) != None and self.PhoneNumber != '':
             self.addToDataBase()
 
     def addToDataBase(self):
