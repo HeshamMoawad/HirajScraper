@@ -413,8 +413,8 @@ class HirajBase(QObject):
     def FetchAds(self,**kwargs)-> PostsResponseObject:
         return PostsResponseObject(self.sendRequest(PayloadQueryTypeFlags.FetchAds,**kwargs))
 
-    def Profile(self,parent:PostObject,UserID:int) -> ProfileObject:
-        return ProfileObject(parent,self.sendRequest(PayloadQueryTypeFlags.FetchAds,**{RequestKeys.Profile.id : UserID}))
+    def Profile(self,parent:PostObject) -> ProfileObject:
+        return ProfileObject(parent,self.sendRequest(PayloadQueryTypeFlags.FetchAds,**{RequestKeys.Profile.id : parent.id}))
     
     def Comments(self,parent:PostObject)-> CommentsObject:
         return CommentsObject(parent,self.sendRequest(PayloadQueryTypeFlags.Comments,**{RequestKeys.Comments.postId : parent.id}))
@@ -443,7 +443,7 @@ class LeadObject(AbstractHirajObject):
         self.Title = parent.title
         self.PhoneNumber = BaseClass.PostContact(parent).contactMobile
         self.LastSeen = BaseClass.User(parent).lastSeenString
-        if self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1) != None and self.PhoneNumber == '':
+        if self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1) != None and self.PhoneNumber != '':
             self.addToDataBase()
 
     def addToDataBase(self):
