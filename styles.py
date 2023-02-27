@@ -71,7 +71,7 @@ class Styles():
         QWidget{
             font:14px;
             color:white;
-            background-color: qlineargradient(spread:pad, x1:0.988636, y1:0.762, x2:0.131, y2:0.500227, stop:0 rgba(38, 31, 29, 210), stop:1 rgba(7, 107, 230, 217));
+            background-color:  qlineargradient(spread:pad, x1:0.943, y1:0.733591, x2:0.131, y2:0.500227, stop:0 rgba(0, 0, 0, 210), stop:1 rgba(7, 107, 230, 217));
         }
         """
     class ComboBox():
