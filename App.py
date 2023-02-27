@@ -24,7 +24,6 @@ class Window(MyQMainWindow):
         self.mainWidget.setStyleSheet(Styles().main)
         self.checker = Checking()
         if self.checker.haveInternet():
-            print(f"Yes Having internet")
             # Define Animated Side Menu 
             self.Menu = QSideMenuEnteredLeaved(
                 parent = self.mainWidget ,
@@ -40,7 +39,6 @@ class Window(MyQMainWindow):
                 Mini_MaxButtonIconPath = "Data\Icons\minimize.png",
                 MiniButtonIconPath = "Data\Icons\delete.png",
             )
-
             # Search Button in Side Menu 
             self.SearchBtn = self.Menu.getButton(0)
             self.SearchBtn.setTexts(entred=' Search',leaved='')
