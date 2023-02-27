@@ -104,7 +104,7 @@ class MyQTreeWidget(QTreeWidget,QWidget):
         return self.extract_data_to_DataFrame()[[self.COLUMN_NAMES[i] for i in lista]].to_string(index=False)
 
     def appendDataAsList(self,items:typing.Optional[list],childs:typing.Optional[list]=None,Icon:str=None)-> None:
-        print(len(items))        
+        # print(len(items))        
         item_ = QTreeWidgetItem(self)
         item_.setIcon(0,QIcon(Icon)) if Icon != None else None
         for i in range(self.columnCount()):
@@ -133,7 +133,7 @@ class MyQTreeWidget(QTreeWidget,QWidget):
 
     #################
     def appendDataAsDict(self,items:typing.Optional[dict],Icon:str=None)-> None:
-        print(items)
+        # print(items)
         item_ = QTreeWidgetItem(self)
         item_.setIcon(0,QIcon(Icon)) if Icon != None else None
         for column in self.ColumnNames:
@@ -323,6 +323,30 @@ class AnimatedToggle(QCheckBox):
         self.update()
 
 
+class MyMessageBox(QMessageBox):
+    INFO = QMessageBox.Icon.Information
+    WARNING = QMessageBox.Icon.Warning
+    CRITICAL = QMessageBox.Icon.Critical
+
+    def showWarning(self,text:typing.Optional[str]="Warning",title:typing.Optional[str]="Warning"):
+        self.setIcon(self.WARNING)
+        self.setWindowTitle(title)
+        self.setText(text)
+        self.exec_()
+
+    def showInfo(self,text:typing.Optional[str]="Info",title:typing.Optional[str]="Information"):
+        self.setIcon(self.INFO)
+        self.setWindowTitle(title)
+        self.setText(text)
+        self.exec_()
+
+    def showCritical(self,text:typing.Optional[str]="Critical",title:typing.Optional[str]="Critical"):
+        self.setIcon(self.CRITICAL)
+        self.setWindowTitle(title)
+        self.setText(text)
+        self.exec_()        
+
+
 class QSideMenuNewStyle(QWidget):
     def __init__(
             self,
@@ -354,7 +378,7 @@ class QSideMenuNewStyle(QWidget):
         self.verticalLayout.setSpacing(0)
         self.TopFrame = MyQFrame(parent,Draggable=True)
         self.TopFrame.setFixedHeight(TopFrameFixedHight) if TopFrameFixedHight != None else None
-        self.TopFrame.setStyleSheet("background-color:transparent;")
+        # self.TopFrame.setStyleSheet("background-color:transparent;")
         self.horizontalLayout_2 = QHBoxLayout(self.TopFrame)
         self.MenuButton = QPushButton(self.TopFrame , text=" Menu")
         # self.MenuButton.setStyleSheet(Styles.BUTTON)
@@ -389,12 +413,12 @@ class QSideMenuNewStyle(QWidget):
         self.horizontalLayout_2.setContentsMargins(5,5,6,5)
         self.verticalLayout.addWidget(self.TopFrame)
         self.BottomFrame = MyQFrame(parent)
-        self.BottomFrame.setStyleSheet("background-color:transparent;")
+        # self.BottomFrame.setStyleSheet("background-color:transparent;")
         self.horizontalLayout = QHBoxLayout(self.BottomFrame)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setSpacing(0)
         self.ButtonsFrame = MyQFrame(self.BottomFrame)
-        self.ButtonsFrame.setStyleSheet("background-color:transparent;")
+        # self.ButtonsFrame.setStyleSheet("background-color:transparent;")
         self.ButtonsFrame.setFixedWidth(ButtonsFrameFixedwidth) if ButtonsFrameFixedwidth != None else None
         self.verticalLayout_2 = QVBoxLayout(self.ButtonsFrame)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -533,30 +557,6 @@ class MyQFrame(QFrame):
             delta = QPoint (event.globalPos() - self.oldPos)
             self.parent().parent().move(self.parent().parent().x() + delta.x(), self.parent().parent().y() + delta.y())
             self.oldPos = event.globalPos()
-
-            
-class MyMessageBox(QMessageBox):
-    INFO = QMessageBox.Icon.Information
-    WARNING = QMessageBox.Icon.Warning
-    CRITICAL = QMessageBox.Icon.Critical
-
-    def showWarning(self,text:typing.Optional[str]="Warning",title:typing.Optional[str]="Warning"):
-        self.setIcon(self.WARNING)
-        self.setWindowTitle(title)
-        self.setText(text)
-        self.exec_()
-
-    def showInfo(self,text:typing.Optional[str]="Info",title:typing.Optional[str]="Information"):
-        self.setIcon(self.INFO)
-        self.setWindowTitle(title)
-        self.setText(text)
-        self.exec_()
-
-    def showCritical(self,text:typing.Optional[str]="Critical",title:typing.Optional[str]="Critical"):
-        self.setIcon(self.CRITICAL)
-        self.setWindowTitle(title)
-        self.setText(text)
-        self.exec_()        
     
 ## --------------- New Class to Convert CustomContextMenu
 class MyCustomContextMenu(QObject):
@@ -720,12 +720,14 @@ class DataBase():
         """
         try:
             columns = self.columns(table)
+            # print(columns)
             t = f"""
             \n
             COLUMNS = {columns}
             INSERT INTO {table} {str(tuple(columns)).replace("'","")}
             VALUES {tuple([(kwargs[column] if kwargs[column] != None else 'NULL') for column in columns ])} ; 
             """
+            # print(t)
             self.cur.execute(f"""
             INSERT INTO {table} {str(tuple(columns)).replace("'","")}
             VALUES {tuple([(kwargs[column] if kwargs[column] != None else 'NULL') for column in columns ])} ; 
@@ -1144,7 +1146,7 @@ class DateOperations(object):
     def __init__(self) -> None:
         pass
 
-    def translateTimeFromStampToDate(self,stamp:float) -> datetime.datetime :
+    def translateTimeFromStampToDate(self,stamp) -> datetime.datetime :
         epoch_time = round(stamp,ndigits=0)
         return datetime.datetime.fromtimestamp( epoch_time )
 
@@ -2178,7 +2180,7 @@ Mozilla/5.0 (iPhone; CPU iPhone OS 8_4 like Mac OS X) AppleWebKit/600.1.4 (KHTML
         return self.genText(8) + '-' + self.genText(4) + '-' + self.genText(4) + '-' + self.genText(4) + '-' + self.genText(14)
 
     def getRandomUserAgent(self) -> str :
-        return str(self.UserAgentList[random.randint(0,len(self.UserAgentList))]).replace("\n","")
+        return str(self.UserAgentList[random.randint(0,len(self.UserAgentList)-2)]).replace("\n","")
 
 
 class ProxyFilterAPI(object): # From  https://free-proxy-list.net/ 
@@ -2255,9 +2257,30 @@ class ProxyFilterAPI(object): # From  https://free-proxy-list.net/
         self.end = time.time()
         if self.start == 0 or round(self.end - self.start,ndigits=0) >= timeout :
             self.autoAPI()
-            print(self.ProxiesList)
+            # print(self.ProxiesList)
             return self.ProxiesList[random.randint(0,len(self.ProxiesList)-1)]
         else :
             return self.ProxiesList[random.randint(0,len(self.ProxiesList)-1)]
             
 
+class Checking(QObject):
+    status = pyqtSignal(str)
+    msg = MyMessageBox() #pyqtSignal(str)
+    LeadSignal = pyqtSignal(dict)
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.internetConnected = False
+    
+    def haveInternet(self,showmsg:bool=True,msg:str="No internet !")->bool:
+        try :
+            requests.get('https://www.google.com/')
+            self.internetConnected = True
+            print(True)
+        except Exception as e :
+            self.internetConnected = True
+            print(f"No internet ! {e}")
+            self.status.emit("msg")
+            if showmsg :
+                self.msg.showCritical(msg)
+        return self.internetConnected
