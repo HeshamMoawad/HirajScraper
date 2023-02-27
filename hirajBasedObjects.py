@@ -6,7 +6,8 @@ from Packages import  (
     pyqtSignal ,
     DateOperations ,
     Generator , 
-    typing)
+    typing
+    )
 
 
 class PayloadQueryTypeFlags():
@@ -201,18 +202,26 @@ class PostContactObject(AbstractHirajObject): # Completed ...
         return super().addToDataBase(DataTableFlags.ContactsData)
 
 
-
 class ProfileObject(AbstractHirajObject): # Completed
     def __init__(self, parent: PostObject, Response: dict) -> None:
         super().__init__(parent, Response)
-        self.id = Response['profile']['id']
-        self.handler = Response['profile'][ResponseKeys.Profile.handler]
-        self.type = Response['profile'][ResponseKeys.Profile.type]
-        self.description = Response['profile'][ResponseKeys.Profile.description]
-        self.contacts = Response['profile'][ResponseKeys.Profile.contacts]
-        if self.Data.Search(table=DataTableFlags.ProfilesData,column='id',val=self.id,indexretval=3) == None:
-            self.addToDataBase()
-
+        # print(Response)
+        if Response['data']['profile'] != None :
+            self.id = Response['data']['profile']['id']
+            self.handler = Response['data']['profile'][ResponseKeys.Profile.handler]
+            self.type = Response['data']['profile'][ResponseKeys.Profile.type]
+            self.description = Response['data']['profile'][ResponseKeys.Profile.description]
+            self.contacts = Response['data']['profile'][ResponseKeys.Profile.contacts]
+            if self.Data.Search(table=DataTableFlags.ProfilesData,column='id',val=self.id,indexretval=3) == None:
+                self.addToDataBase()
+        else:
+            self.id = parent.id #Response['data']['profile']['id']
+            self.handler = parent.authorUsername  #Response['data']['profile'][ResponseKeys.Profile.handler]
+            self.type = None #Response['data']['profile'][ResponseKeys.Profile.type]
+            self.description = None #Response['data']['profile'][ResponseKeys.Profile.description]
+            self.contacts = None #Response['data']['profile'][ResponseKeys.Profile.contacts]
+            if self.Data.Search(table=DataTableFlags.ProfilesData,column='id',val=self.id,indexretval=3) == None:
+                self.addToDataBase()
 
     def addToDataBase(self):
         return super().addToDataBase(DataTableFlags.ProfilesData)
@@ -328,7 +337,7 @@ class UserObject(AbstractHirajObject):
         self.isBlocked = Response['data']['user']['isBlocked']
         self.isBlocked = Response['data']['user']['isBlocked']
         self.lastSeen = Response['data']['user']['lastSeen']
-        self.lastSeenString = str(self.Date.translateTimeFromStampToDate(self.lastSeen))
+        self.lastSeenString =  str(self.Date.translateTimeFromStampToDate(self.lastSeen)) if isinstance(self.lastSeen , int) else "last seen Not Found" 
         self.countFollowers = Response['data']['user']['countFollowers']
         if self.Data.Search(table=DataTableFlags.UsersData,column='id',val=self.id,indexretval=3) == None:
             self.addToDataBase()
@@ -342,6 +351,7 @@ class HirajBase(QObject):
     LeadsSignal = pyqtSignal(dict)
     AdIDSignal = pyqtSignal(int)
     UserIDSignal = pyqtSignal(int)
+    status = pyqtSignal(str)
 
     class Flags():
         Random = 'Random'
@@ -408,18 +418,23 @@ class HirajBase(QObject):
         return  response.json()
 
     def Search(self,**kwargs) -> PostsResponseObject:
+        self.status.emit(f"Sending Search Request ")
         return PostsResponseObject(self.sendRequest(PayloadQueryTypeFlags.Search,**kwargs)) 
          
     def FetchAds(self,**kwargs)-> PostsResponseObject:
+        self.status.emit(f"Sending FetchAds Request ")
         return PostsResponseObject(self.sendRequest(PayloadQueryTypeFlags.FetchAds,**kwargs))
 
     def Profile(self,parent:PostObject) -> ProfileObject:
-        return ProfileObject(parent,self.sendRequest(PayloadQueryTypeFlags.FetchAds,**{RequestKeys.Profile.id : parent.id}))
+        self.status.emit(f"Sending Profile Request ")
+        return ProfileObject(parent,self.sendRequest(PayloadQueryTypeFlags.Profile,**{RequestKeys.Profile.id : parent.id}))
     
     def Comments(self,parent:PostObject)-> CommentsObject:
+        self.status.emit(f"Sending Comments Request ")
         return CommentsObject(parent,self.sendRequest(PayloadQueryTypeFlags.Comments,**{RequestKeys.Comments.postId : parent.id}))
 
     def PostContact(self,parent:PostObject)-> PostContactObject:
+        self.status.emit(f"Sending PostContact Request ")
         return PostContactObject(
             parent ,
             self.sendRequest(
@@ -430,9 +445,11 @@ class HirajBase(QObject):
         )
                 
     def SimilarPosts(self,PostIDSimilar:int)-> PostsResponseObject:
+        self.status.emit(f"Sending SimilarPosts Request ")
         return PostsResponseObject(self.sendRequest(PayloadQueryTypeFlags.SimilarPosts,**{RequestKeys.SimilarPosts.id:PostIDSimilar}))
 
     def User(self,parent:PostObject)->UserObject: 
+        self.status.emit(f"Sending User Request ")
         return UserObject(parent,self.sendRequest(PayloadQueryTypeFlags.User,**{RequestKeys.User.Username:parent.authorUsername}))
 
 
@@ -443,9 +460,12 @@ class LeadObject(AbstractHirajObject):
         self.Title = parent.title
         self.PhoneNumber = BaseClass.PostContact(parent).contactMobile
         self.LastSeen = BaseClass.User(parent).lastSeenString
-        if self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1) != None and self.PhoneNumber != '':
+        # print("\nlead search->",self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1))
+        self.new = False
+        if self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1) == None and self.PhoneNumber != '':
+            self.new = True
             self.addToDataBase()
+            # print("Lead Added to database")
 
     def addToDataBase(self):
         return super().addToDataBase(DataTableFlags.Leads)
-    
