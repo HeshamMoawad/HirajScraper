@@ -12,6 +12,7 @@ from Packages import (
 )
 import os , openpyxl,pandas,pyperclip,typing
 from datetime import datetime
+import subprocess
 
 
 class Search(QObject):
@@ -20,6 +21,7 @@ class Search(QObject):
     def __init__(self, parent):
         super().__init__()
         # ['UserName','PhoneNumber','Title','LastSeen']
+        self.keyword = ''
         self.ExportRange = {'UserName':0,'PhoneNumber':1,'Title':2,'LastSeen':3 }
         self.gridLayout = QtWidgets.QGridLayout(parent)
         self.MainFrame = QtWidgets.QFrame(parent)
@@ -91,7 +93,7 @@ class Search(QObject):
             lambda: self.copy(0) ,
             lambda: self.copy(1) ,
             lambda: self.delete() ,
-            lambda : self.export(self.ExportNameLineEdit.text(),self.ExportRange),
+            lambda : self.export(f"{self.ExportNameLineEdit.text()}-'{self.keyword}'",self.ExportRange),
             lambda : self.treeWidget.clear()
         ])
         menu.show()
@@ -110,7 +112,7 @@ class Search(QObject):
             self.msg.showWarning(text="No Item Selected please Select one !")
 
     def export(self,name:typing.Optional[str],values:dict):
-        if name == '' or name == ' ':
+        if name == "-''" or name == "-''":
             name = f"Hour{datetime.now().hour}Minute{datetime.now().minute}"
         if self.treeWidget._ROW_INDEX > 0 :
             self.treeWidget.getCustomDataFrame(values).to_excel(f"Data/Exports/{name}[{datetime.now().date()}].xlsx",index=False)
@@ -118,6 +120,8 @@ class Search(QObject):
         else :
             self.msg.showWarning(text="No Data In App Please Try Again Later")
 
+    def setkeyword(self , keyword):
+        self.keyword = keyword
 
     def setExportRange(self,values:dict):
         self.ExportRange = values
@@ -131,6 +135,7 @@ class Setting(QObject):
     AREAS = ["","الرياض","الشرقيه","جده","مكه","ينبع","حفر الباطن","المدينة","الطايف","تبوك","القصيم","حائل","أبها","عسير","الباحة","جيزان","نجران","الجوف","عرعر","الكويت","الإمارات","البحرين"]
     msg = MyMessageBox()
     ExportRangeSignal = pyqtSignal(dict)
+    keywordSignal = pyqtSignal(str)
     def __init__(self, parent):
         super().__init__()
         self.gridLayout = QtWidgets.QGridLayout(parent)
@@ -153,6 +158,7 @@ class Setting(QObject):
         self.KeyWordLabel.setText('KeyWord')
         self.horizontalLayout_2.addWidget(self.KeyWordLabel, 0, QtCore.Qt.AlignHCenter)
         self.KeyWordLineEdit = QtWidgets.QLineEdit(self.KeyWordFrame)
+        self.KeyWordLineEdit.textChanged.connect(self.keywordSignal.emit)
         self.KeyWordLineEdit.setPlaceholderText('Enter KeyWord Here ...')
         self.horizontalLayout_2.addWidget(self.KeyWordLineEdit)
         self.horizontalLayout_2.setStretch(0, 1)
@@ -360,18 +366,28 @@ class Sheets(QObject):
     def Menu(self):
         menu = MyCustomContextMenu(
             Actions_arg=[
-                #"Open Excel Sheet",
+                "Open Excel Sheet",
                 "Copy Sheet Numbers" ,
                 "Copy All Sheet Numbers" ,
                 "Delete sheet" ,
             ]
         )
         menu.multiConnect(functions=[
+            lambda : self.openexcelsheet() ,
             lambda : self.copyNumbersFromExcel() ,
             lambda : self.copyNumbersFromExcelAll(),
             lambda : self.deleteSheet(),
         ])
         menu.show()
+
+
+    def openexcelsheet(self):
+        try :
+            file = f"Data\Exports\{self.treeWidget.currentItem().text(0)}"
+            subprocess.Popen([file], shell=True)
+        except Exception as e :
+            self.msg.showWarning('No sheet Selected')
+
 
     def copyNumbersFromExcel(self):
         file = self.treeWidget.currentItem().text(0)
@@ -429,7 +445,7 @@ class Similar(QObject):
 
     def __init__(self, parent) -> None:
         super().__init__()
-        self.ExportRange = {'UserName':0,'Title':1,'PhoneNumber':2,'LastSeen':3 }
+        self.ExportRange = {'UserName':0,'PhoneNumber':1,'Title':2,'LastSeen':3 }
         self.gridLayout = QtWidgets.QGridLayout(parent)
         self.frame = QtWidgets.QFrame(parent)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.frame)
@@ -509,7 +525,7 @@ class Similar(QObject):
             lambda: self.copy(0) ,
             lambda: self.copy(1) ,
             lambda: self.delete() ,
-            lambda : self.export(self.ExportNameLineEdit.text(),self.ExportRange),
+            lambda : self.export(f"{self.ExportNameLineEdit.text()}-'Similar'",self.ExportRange),
             lambda : self.treeWidget.clear()
         ])
         menu.show()
