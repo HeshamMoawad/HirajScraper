@@ -2279,7 +2279,7 @@ class Checking(QObject):
             print(True)
         except Exception as e :
             self.internetConnected = True
-            print(f"No internet ! {e}")
+            # print(f"No internet ! {e}")
             self.status.emit("msg")
             if showmsg :
                 self.msg.showCritical(msg)

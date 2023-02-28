@@ -4,6 +4,7 @@ from hirajBasedObjects import (
     PostObject ,
     LeadObject ,
     RequestKeys ,
+    DataTableFlags
     )
 
 from Packages import  (
@@ -30,7 +31,7 @@ class Hiraj(QObject):
         super().__init__()
         self.HirajBase = HirajBase()
         self.HirajBase.status.connect(self.status.emit)
-        self.HirajBase.msg.connect(self.msg.emit)
+        # self.HirajBase.msg.connect()
         # self.FastLevel = FastLevel
         
 
@@ -45,7 +46,7 @@ class Hiraj(QObject):
                 self.status.emit(f"Scraped Post with ID : {post.id}")
                 # profile = self.HirajBase.Profile(post)
                 Lead = LeadObject(post,BaseClass=self.HirajBase)
-                if Lead.PhoneNumber != '' :
+                if Lead.PhoneNumber != '' and Lead.isNew :
                     self.LeadSignal.emit(Lead.dictOfObject)
                     # print(Lead.dictOfObject)
                 if comments == HirajBase.Flags.Yes :
@@ -62,7 +63,7 @@ class Hiraj(QObject):
                 self.status.emit(f"Scraped Commenter Post with ID : {post.id}")
                 # profile = self.HirajBase.Profile(post)
                 Lead = LeadObject(post,self.HirajBase)
-                if Lead.PhoneNumber != '':
+                if Lead.PhoneNumber != '' and Lead.isNew :
                     self.LeadSignal.emit(Lead.dictOfObject)
                     # print(Lead.dictOfObject)
                     break
@@ -79,7 +80,7 @@ class Hiraj(QObject):
                     self.status.emit(f"Scraped Similar Posts Like ID : {post.id}")
                     # profile = self.HirajBase.Profile(post)
                     Lead = LeadObject(post,self.HirajBase)
-                    if Lead.PhoneNumber != '' :
+                    if Lead.PhoneNumber != '' and Lead.isNew :
                         # if self.HirajBase.Data.Search()
                         self.LeadSignal.emit(Lead.dictOfObject)
                         # print(Lead.dictOfObject)
