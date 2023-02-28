@@ -1,15 +1,5 @@
-# Hiraj_Scraper
-Simple App to collect some data from "حراج" website that Collect Phone numbers and Ad Location and Ad Article 
-
-# Features
-* 1 - New Scrape Algorithm 
-* 2 - Fast Scrape
-* 3 - More Performance
-* 4 - Add New Style for Side Menu
-
-# Fixed 
-* 1 - Fix HideBrowser Issue
-* 2 - Fix Phone Number Not Found
+# Hiraj Scraper
+Application that scrape saudi phone numbers from hiraj.com site and extract ads and user data 
 
 # Project Photos
 
@@ -17,22 +7,49 @@ Simple App to collect some data from "حراج" website that Collect Phone numbe
 
 ![Screenshot](page2.PNG) 
 
+![Screenshot](page3.PNG) 
+
+![Screenshot](page4.PNG) 
+
+
+# Features v3.0 
+* 1 - New Scrape Algorithm with Hiraj API
+* 2 - Add Similar page to scrape similar posts
+* 3 - Add Sheets page (to handling all sheets in export folder)
+* 4 - Add more options in Setting page
+* 5 - Add More Performance
+* 6 - Increase Scrape speed
+* 7 - No Browser
+
+
+
 
 ## Pages
 
-* DashBoard --> That show data that collected and start , stop button and you can export to excel from it
-* setting --> To Input Scrape Condition , Limit , handling Scrape Comment , handling HideBrowser
+* Search --> That Show Data from Search and write export name 
+* Setting --> That handling setting in app with export options
+* Sheets --> show all sheets in (Data/Exports) path and remote all sheets 
+* Similar --> helps you to scrape similar ads from phone numbers 
 
-## Built With
-
-* Python
-* Selenium 
-* Hiraj
  
 ## Frameworks 
 * [PyQt5](https://doc.qt.io/qtforpython/)   For Build GUI 
-* [Selenium](https://www.selenium.dev/)     For WebAutomation
+* [Requests](https://requests.readthedocs.io/en/latest/)     For Requests Server
+* [Pandas](https://pandas.pydata.org/)     For Data operations
+* [Json](https://www.json.org/json-en.html)     For translate server messages
 
-#### v2.1 Update 
-## Made By K7_Team Hesham
+
+
+## Contact Me
+* Email : [Heshammoawad120120@gmail.com]
+* WhatsApp : [+201111141853] 
+* [Linkedin](https://www.linkedin.com/in/hesham-moawad-916481244)
+
+
+
+## License
+
+Licensed under the [MIT License](LICENSE)
+
+## Made By Hesham
 #### You Can Only build .exe file with PyInstaller
