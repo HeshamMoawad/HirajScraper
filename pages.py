@@ -10,9 +10,11 @@ from Packages import (
     AnimatedToggle ,
     pyqtSignal
 )
+
 import os , openpyxl,pandas,pyperclip,typing
 from datetime import datetime
 import subprocess
+from styles import Styles
 
 
 class Search(QObject):
@@ -68,6 +70,7 @@ class Search(QObject):
         self.counterLabel = QtWidgets.QLabel(self.frame_2)
         self.counterLabel.setText('Count : 0')
         self.treeWidget = MyQTreeWidget(self.frame_2,counterLabel=self.counterLabel)
+        self.treeWidget.setStyleSheet(Styles.TreeWidget.Normal)
         self.treeWidget.setColumns(['UserName','PhoneNumber','Title','LastSeen'])
         self.treeWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.treeWidget.customContextMenuRequested.connect(self.menu)
@@ -125,7 +128,6 @@ class Search(QObject):
 
     def setExportRange(self,values:dict):
         self.ExportRange = values
-
 
 
 
@@ -190,6 +192,7 @@ class Setting(QObject):
         self.CategoryLabel.setText('Category')
         self.horizontalLayout_4.addWidget(self.CategoryLabel, 0, QtCore.Qt.AlignHCenter)
         self.CategoryCombobox = QtWidgets.QComboBox(self.CategoryFrame)
+        self.CategoryCombobox.setFixedHeight(30)
         self.CategoryCombobox.addItems(self.CATEGORIES)
         self.CategoryCombobox.currentIndexChanged.connect(self.changeComboBox)
         self.horizontalLayout_4.addWidget(self.CategoryCombobox)
@@ -201,6 +204,8 @@ class Setting(QObject):
         self.SubCategoryLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.horizontalLayout_5.addWidget(self.SubCategoryLabel)
         self.SubCategoryCombobox = QtWidgets.QComboBox(self.SubCategoryFrame)
+        self.SubCategoryCombobox.setFixedHeight(30)
+        self.SubCategoryCombobox.setFixedWidth(150)
         self.horizontalLayout_5.addWidget(self.SubCategoryCombobox)
         self.horizontalLayout_6.addWidget(self.SubCategoryFrame)
         self.verticalLayout_2.addWidget(self.CategorySubMainFrame)
@@ -212,6 +217,7 @@ class Setting(QObject):
         self.CityLabel.setText('City')
         self.horizontalLayout_7.addWidget(self.CityLabel, 0, QtCore.Qt.AlignHCenter)
         self.CityCombobox = QtWidgets.QComboBox(self.CityFrame)
+        self.CityCombobox.setFixedHeight(30)
         self.CityCombobox.addItems(self.AREAS)
         self.horizontalLayout_7.addWidget(self.CityCombobox)
         self.horizontalLayout_9.addWidget(self.CityFrame)
@@ -331,7 +337,7 @@ class Sheets(QObject):
             self.frame_2,
             counterLabel = self.label ,
             )
-
+        self.treeWidget.setStyleSheet(Styles.TreeWidget.Normal)
         self.label_2 = QtWidgets.QLabel(self.frame_2)
         self.label_2.setText("NumbersCount : 0")
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
@@ -380,14 +386,12 @@ class Sheets(QObject):
         ])
         menu.show()
 
-
     def openexcelsheet(self):
         try :
             file = f"Data\Exports\{self.treeWidget.currentItem().text(0)}"
             subprocess.Popen([file], shell=True)
         except Exception as e :
             self.msg.showWarning('No sheet Selected')
-
 
     def copyNumbersFromExcel(self):
         file = self.treeWidget.currentItem().text(0)
@@ -420,7 +424,6 @@ class Sheets(QObject):
             result = (result + "\n" + string ) if string != "" else result
         pyperclip.copy(result)
         
-
     def deleteSheet(self):
         file = self.treeWidget.currentItem().text(0)
         try:
@@ -437,7 +440,6 @@ class Sheets(QObject):
             total += int(self.treeWidget.topLevelItem(sheet).text(1))
         return total
         
-
 
 
 class Similar(QObject):
@@ -501,6 +503,7 @@ class Similar(QObject):
         self.CounterLabel = QtWidgets.QLabel(self.TreeWidgetFrame)
         self.CounterLabel.setText('Count : 0')
         self.treeWidget = MyQTreeWidget(self.TreeWidgetFrame,counterLabel=self.CounterLabel)
+        self.treeWidget.setStyleSheet(Styles.TreeWidget.Normal)
         self.treeWidget.setColumns(['UserName','PhoneNumber','Title','LastSeen'])
         self.treeWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.treeWidget.customContextMenuRequested.connect(self.menu)
@@ -530,7 +533,6 @@ class Similar(QObject):
         ])
         menu.show()
 
-
     def copy(self , index:int):
         try :
             pyperclip.copy(self.treeWidget.currentItem().text(index))
@@ -551,7 +553,6 @@ class Similar(QObject):
             self.msg.showInfo(text=f"Exported Succecfully to 'Data/Exports/{name}[{datetime.now().date()}].xlsx'")
         else :
             self.msg.showWarning(text="No Data In App Please Try Again Later")
-
 
     def setExportRange(self,values:dict):
         self.ExportRange = values

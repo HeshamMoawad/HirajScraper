@@ -28,7 +28,7 @@ class Window(MyQMainWindow):
             # Define Animated Side Menu 
             self.Menu = QSideMenuEnteredLeaved(
                 parent = self.mainWidget ,
-                Title = "Welcome " ,
+                Title = "Welcome يا اخوياااااا" ,
                 ButtonsCount = 4 ,
                 PagesCount = 4 ,
                 ToggleCount = 0 ,
@@ -78,29 +78,36 @@ class Window(MyQMainWindow):
             self.SearchThread = SearchThread()
             self.SearchThread.setMainClass(self)
             self.SearchThread.msg.connect(self.msg.showInfo)
-            self.SearchThread.statues.connect(self.Menu.MainLabel.setText)
-            self.SearchThread.LeadSignal.connect(self.SearchPage.treeWidget.appendDataAsDict)
+            self.SearchThread.status.connect(self.Menu.MainLabel.setText)
+            self.SearchThread.hiraj.msg.connect(self.msg.showInfo)
+            self.SearchThread.hiraj.status.connect(self.Menu.MainLabel.setText)
+            self.SearchThread.hiraj.LeadSignal.connect(self.SearchPage.treeWidget.appendDataAsDict)
             self.SearchPage.StartBtn.clicked.connect(self.SearchThread.start)
             self.SearchPage.StopBtn.clicked.connect(lambda : self.SearchThread.kill(msg='Stopped Search Succecfully'))
             # SimilarThread Part 
-            self.SimilarThread = SimilarThread()
+            self.SimilarThread = SimilarThread() 
             self.SimilarThread.setMainClass(self)
             self.SimilarThread.msg.connect(self.msg.showInfo)
-            self.SimilarThread.statues.connect(self.Menu.MainLabel.setText)
-            self.SimilarThread.LeadSignal.connect(self.SimilarPage.treeWidget.appendDataAsDict)
+            self.SimilarThread.status.connect(self.Menu.MainLabel.setText)
+            self.SimilarThread.hiraj.msg.connect(self.msg.showInfo)
+            self.SimilarThread.hiraj.status.connect(self.Menu.MainLabel.setText)
+            self.SimilarThread.hiraj.LeadSignal.connect(self.SimilarPage.treeWidget.appendDataAsDict)
             self.SimilarPage.StartButton.clicked.connect(self.SimilarThread.start)
             self.SimilarPage.StopButton.clicked.connect( lambda :self.SimilarThread.kill(msg='Stopped Similar Search Succecfully') )
             # styles
             self.Menu.TopFrame.setStyleSheet(Styles.Backgrounds.White)
-            # self.Menu.BottomFrame.setStyleSheet(Styles.Frame.custom)
-            # self.Menu.ButtonsFrame.setStyleSheet(Styles.Frame.custom)
-            
+            self.setAppIcon("Data\Icons\hiraj.png")
             return super().SetupUi()
 
 
 class SearchThread(MyThread):
     LeadSignal = pyqtSignal(dict)
+    msg = pyqtSignal(str)
     status = pyqtSignal(str)
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.hiraj = Hiraj()
 
     def setMainClass(self,window:Window):
         self.MainClass = window
@@ -114,13 +121,9 @@ class SearchThread(MyThread):
         key = self.MainClass.SettingPage.KeyWordLineEdit.text()
         keyword = key if key != '' and key != ' ' else ''
         self.statues.emit(f'Starting Search with keyword {keyword}')
-        hiraj = Hiraj()
-        hiraj.status.connect(self.status.emit)
-        hiraj.LeadSignal.connect(self.LeadSignal.emit)
-        hiraj.msg.connect(self.msg.emit)
-        hiraj.Search(
+        self.hiraj.Search(
             limitPage = self.MainClass.SettingPage.LimitSpinbox.value() ,
-            comments = hiraj.HirajBase.Flags.Yes if self.MainClass.SettingPage.CommentsToggle.isChecked() else hiraj.HirajBase.Flags.No ,
+            comments = self.hiraj.HirajBase.Flags.Yes if self.MainClass.SettingPage.CommentsToggle.isChecked() else self.hiraj.HirajBase.Flags.No ,
             **{
                 RequestKeys.Search.tag : tag ,
                 RequestKeys.Search.cities : city ,
@@ -130,24 +133,32 @@ class SearchThread(MyThread):
         self.statues.emit('Ending good luck ^_^')
         self.msg.emit('Ending good luck ^_^')
 
-
+    def kill(self, msg: str = None):
+        if self.isRunning():
+            self.status.emit("Stopped Succecfully")
+        return super().kill(msg)
 
 class SimilarThread(MyThread):
     LeadSignal = pyqtSignal(dict)
     status = pyqtSignal(str)
+    msg = pyqtSignal(str)
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.hiraj = Hiraj()
+
 
     def setMainClass(self,window:Window):
         self.MainClass = window
 
     def run(self) -> None:
         self.statues.emit('Starting with Similar ')
-        hiraj = Hiraj()
-        hiraj.msg.connect(self.msg.emit)
-        hiraj.status.connect(self.status.emit)
-        hiraj.LeadSignal.connect(self.LeadSignal.emit)
-        hiraj.Similar(
+        self.hiraj.msg.connect(self.msg.emit)
+        self.hiraj.status.connect(self.status.emit)
+        self.hiraj.LeadSignal.connect(self.LeadSignal.emit)
+        self.hiraj.Similar(
             self.MainClass.SimilarPage.plainTextEdit.toPlainText().splitlines(),
-            comments = hiraj.HirajBase.Flags.Yes if self.MainClass.SettingPage.CommentsToggle.isChecked() else hiraj.HirajBase.Flags.No
+            comments = self.hiraj.HirajBase.Flags.Yes if self.MainClass.SettingPage.CommentsToggle.isChecked() else self.hiraj.HirajBase.Flags.No
             )
         self.statues.emit('Ending good luck ^_^')
         self.msg.emit('Ending good luck ^_^')

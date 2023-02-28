@@ -152,7 +152,9 @@ class PostObject(object): # Completed ...
         self.Data = DataBase('Data\DataBase.db')
         self.Date = DateOperations() 
         self.DateScraping = self.Date.getCurrentDate()
+        self.isNew = False
         if self.Data.Search(table=DataTableFlags.AdsData,column='id',val=self.id,indexretval= 3) == None:
+            self.isNew = True
             self.addToDataBase()
 
     def __str__(self) -> str:
@@ -349,8 +351,7 @@ class UserObject(AbstractHirajObject):
 
 class HirajBase(QObject):
     msg = pyqtSignal(str)
-    message = MyMessageBox()
-    LeadsSignal = pyqtSignal(dict)
+    # LeadsSignal = pyqtSignal(dict)
     AdIDSignal = pyqtSignal(int)
     UserIDSignal = pyqtSignal(int)
     status = pyqtSignal(str)
@@ -411,23 +412,17 @@ class HirajBase(QObject):
         Payload = self.Payloads[RequestType]
         for key,value in kwargs.items():
             Payload['variables'][key] = value
-        try:
-            response = requests.post(
-                url = url ,
-                headers = self.getHeaders(UserAgent) ,
-                json = Payload ,
-                params = self.getClientID(ClientID) , 
-                timeout = 10
-            )
-            return  response.json()
-        except Exception as e :
-            print(f"\n{e}\n")
-            self.msg.emit("Please Check your Internet connection !!") 
+        response = requests.post(
+            url = url ,
+            headers = self.getHeaders(UserAgent) ,
+            json = Payload ,
+            params = self.getClientID(ClientID) , 
+            timeout = 20
+        )
+        return  response.json()
         
-
     def Search(self,**kwargs) -> PostsResponseObject:
         self.status.emit(f"Sending Search Request ")
-        self.message.showInfo('Hiiiiiii')
         return PostsResponseObject(self.sendRequest(PayloadQueryTypeFlags.Search,**kwargs)) 
          
     def FetchAds(self,**kwargs)-> PostsResponseObject:
