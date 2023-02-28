@@ -21,6 +21,7 @@ from styles import Styles
 class Window(MyQMainWindow):
     def SetupUi(self):
         self.resize(650,550)
+        self.setFrameLess()
         self.mainWidget.setStyleSheet(Styles().main)
         self.checker = Checking()
         if self.checker.haveInternet():
@@ -89,6 +90,11 @@ class Window(MyQMainWindow):
             self.SimilarThread.LeadSignal.connect(self.SimilarPage.treeWidget.appendDataAsDict)
             self.SimilarPage.StartButton.clicked.connect(self.SimilarThread.start)
             self.SimilarPage.StopButton.clicked.connect( lambda :self.SimilarThread.kill(msg='Stopped Similar Search Succecfully') )
+            # styles
+            self.Menu.TopFrame.setStyleSheet(Styles.Backgrounds.White)
+            # self.Menu.BottomFrame.setStyleSheet(Styles.Frame.custom)
+            # self.Menu.ButtonsFrame.setStyleSheet(Styles.Frame.custom)
+            
             return super().SetupUi()
 
 
@@ -147,11 +153,6 @@ class SimilarThread(MyThread):
         self.msg.emit('Ending good luck ^_^')
 
         
-
-
-
-
-
 
 w = Window()
 w.show()
