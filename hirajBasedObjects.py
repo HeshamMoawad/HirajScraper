@@ -6,7 +6,8 @@ from Packages import  (
     pyqtSignal ,
     DateOperations ,
     Generator , 
-    typing
+    typing ,
+    MyMessageBox
     )
 
 
@@ -348,6 +349,7 @@ class UserObject(AbstractHirajObject):
 
 class HirajBase(QObject):
     msg = pyqtSignal(str)
+    message = MyMessageBox()
     LeadsSignal = pyqtSignal(dict)
     AdIDSignal = pyqtSignal(int)
     UserIDSignal = pyqtSignal(int)
@@ -409,16 +411,23 @@ class HirajBase(QObject):
         Payload = self.Payloads[RequestType]
         for key,value in kwargs.items():
             Payload['variables'][key] = value
-        response = requests.post(
-            url = url ,
-            headers = self.getHeaders(UserAgent) ,
-            json = Payload ,
-            params = self.getClientID(ClientID)
-        )
-        return  response.json()
+        try:
+            response = requests.post(
+                url = url ,
+                headers = self.getHeaders(UserAgent) ,
+                json = Payload ,
+                params = self.getClientID(ClientID) , 
+                timeout = 10
+            )
+            return  response.json()
+        except Exception as e :
+            print(f"\n{e}\n")
+            self.msg.emit("Please Check your Internet connection !!") 
+        
 
     def Search(self,**kwargs) -> PostsResponseObject:
         self.status.emit(f"Sending Search Request ")
+        self.message.showInfo('Hiiiiiii')
         return PostsResponseObject(self.sendRequest(PayloadQueryTypeFlags.Search,**kwargs)) 
          
     def FetchAds(self,**kwargs)-> PostsResponseObject:
@@ -461,9 +470,9 @@ class LeadObject(AbstractHirajObject):
         self.PhoneNumber = BaseClass.PostContact(parent).contactMobile
         self.LastSeen = BaseClass.User(parent).lastSeenString
         # print("\nlead search->",self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1))
-        self.new = False
+        self.isNew = False
         if self.Data.Search(table=DataTableFlags.Leads,column='PhoneNumber',val=self.PhoneNumber,indexretval=1) == None and self.PhoneNumber != '':
-            self.new = True
+            self.isNew = True
             self.addToDataBase()
             # print("Lead Added to database")
 
