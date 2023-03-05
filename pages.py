@@ -55,6 +55,7 @@ class Search(QObject):
         self.StartBtn = QtWidgets.QToolButton(self.StartStopFrame)
         self.StartBtn.setText("Start")
         self.StartBtn.setAutoRaise(False)
+        self.StartBtn.setShortcut('enter')
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.StartBtn.setSizePolicy(sizePolicy)
         self.horizontalLayout_2.addWidget(self.StartBtn)
@@ -324,6 +325,7 @@ class Sheets(QObject):
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.toolButton.setSizePolicy(sizePolicy)
         self.toolButton.clicked.connect(self.refresh)
+        self.toolButton.setShortcut('enter')
         self.verticalLayout.addWidget(self.toolButton)
 
         self.frame_2 = QtWidgets.QFrame(parent)
@@ -406,6 +408,7 @@ class Sheets(QObject):
             pyperclip.copy(df[df.columns[1]].to_string(index=False)) 
 
     def copyNumbersFromExcelAll(self):
+        self.refresh()
         result = ""
         for sheet in range(self.treeWidget._ROW_INDEX):
             file = self.treeWidget.topLevelItem(sheet).text(0)
@@ -433,6 +436,7 @@ class Sheets(QObject):
                 text="Can't delete this excel sheet :\n please make sure you don't open this file currently" ,
                 title = "Delete Faild" ,
             )
+        self.refresh()
 
     def totalNumbers(self)-> int :
         total = 0
@@ -488,6 +492,7 @@ class Similar(QObject):
         self.StartButton = QtWidgets.QToolButton(self.ButtonsFrame)
         self.StartButton.setText('Start')
         self.StartButton.setAutoRaise(False)
+        self.StartButton.setShortcut('enter')
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.StartButton.setSizePolicy(sizePolicy)
         self.horizontalLayout_4.addWidget(self.StartButton)
